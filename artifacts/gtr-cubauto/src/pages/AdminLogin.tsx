@@ -13,7 +13,7 @@ export default function AdminLogin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "GTR2025Auto") {
+    if (password === "RIVERO123") {
       localStorage.setItem("gtr_admin_auth", "true");
       setLocation("/admin/dashboard");
     } else {

@@ -8,7 +8,7 @@ export function useAdminAuth() {
   const [, setLocation] = useLocation();
 
   const login = (password: string) => {
-    if (password === "GTR2025Auto") {
+    if (password === "RIVERO123") {
       localStorage.setItem("gtr_admin_auth", "true");
       setIsAuthenticated(true);
       setLocation("/admin/dashboard");
