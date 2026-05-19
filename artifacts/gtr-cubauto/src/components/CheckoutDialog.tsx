@@ -6,12 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { CreditCard, Smartphone, Truck, CheckCircle2 } from "lucide-react";
+import { CreditCard, Smartphone, Truck, CheckCircle2, MapPin } from "lucide-react";
 import { getSiteConfig } from "@/hooks/use-site-config";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NEON = "#00ff41";
 const NEON_DIM = "#00ff4115";
 const NEON_BORDER = "#00ff4130";
+
+const CUBA_PROVINCES = [
+  "Pinar del Río", "Artemisa", "La Habana", "Mayabeque", "Matanzas",
+  "Villa Clara", "Cienfuegos", "Sancti Spíritus", "Ciego de Ávila",
+  "Camagüey", "Las Tunas", "Holguín", "Granma", "Santiago de Cuba",
+  "Guantánamo", "Isla de la Juventud",
+];
 
 type Product = { id: number; name: string; price: number; stock: number };
 interface CheckoutDialogProps { product: Product | null; onClose: () => void; }
@@ -30,6 +38,7 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
   const cfg = getSiteConfig();
   const [step, setStep] = useState<"form" | "success">("form");
   const [clientName, setClientName] = useState("");
+  const [province, setProvince] = useState("");
   const [qty, setQty] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const [zelleRef, setZelleRef] = useState("");
@@ -42,7 +51,7 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
   const total = (product?.price ?? 0) * qty;
 
   const handleClose = () => {
-    setStep("form"); setClientName(""); setQty(1); setPaymentMethod("cod");
+    setStep("form"); setClientName(""); setProvince(""); setQty(1); setPaymentMethod("cod");
     setZelleRef(""); setCardNum(""); setCardName(""); setCardExpiry(""); setCardCvv(""); setAddress("");
     onClose();
   };
@@ -56,7 +65,8 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
       card: cardNum ? ` ****${cardNum.slice(-4)}` : "",
       cod: address ? ` Dir:${address}` : "",
     };
-    const fullName = `${clientName || "Cliente"} [${payLabels[paymentMethod]}${payExtra[paymentMethod]}]`;
+    const regionTag = province ? ` [${province}]` : "";
+    const fullName = `${clientName || "Cliente"} [${payLabels[paymentMethod]}${payExtra[paymentMethod]}]${regionTag}`;
     createOrder.mutate(
       { data: { clientName: fullName, type: "retail", items: [{ productId: product.id, productName: product.name, qty, unitPrice: product.price }] } },
       {
@@ -80,6 +90,7 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
             </p>
             <div className="w-full rounded-xl p-4 border space-y-2 text-sm" style={{ borderColor: NEON_BORDER, background: "#0a0a0a" }}>
               <div className="flex justify-between"><span style={{ color: "#666" }}>Método:</span><span className="font-bold">{PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label}</span></div>
+              {province && <div className="flex justify-between"><span style={{ color: "#666" }}>Región:</span><span className="font-bold">{province}</span></div>}
               <div className="flex justify-between"><span style={{ color: "#666" }}>Cantidad:</span><span className="font-bold">{qty} ud.</span></div>
               <div className="flex justify-between"><span style={{ color: "#666" }}>Total:</span><span className="font-black text-lg neon-text" style={{ color: NEON }}>${total.toFixed(2)}</span></div>
             </div>
@@ -94,33 +105,51 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name */}
+              <div className="space-y-1">
+                <Label className="text-xs uppercase tracking-wide" style={{ color: "#888" }}>Nombre completo</Label>
+                <Input required value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Juan Pérez"
+                  className="text-white border-0 focus-visible:ring-1" style={{ background: "#111" }} />
+              </div>
+
+              {/* Province + Qty row */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2 space-y-1">
-                  <Label className="text-xs uppercase tracking-wide" style={{ color: "#888" }}>Nombre completo</Label>
-                  <Input required value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Juan Pérez"
-                    className="text-white border-0 focus-visible:ring-1" style={{ background: "#111", borderColor: "#222" }} />
+                <div className="space-y-1">
+                  <Label className="text-xs uppercase tracking-wide flex items-center gap-1" style={{ color: "#888" }}>
+                    <MapPin className="h-3 w-3" /> Provincia
+                  </Label>
+                  <Select value={province} onValueChange={setProvince}>
+                    <SelectTrigger className="text-white border-0 h-10 text-sm" style={{ background: "#111" }}>
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
+                    <SelectContent className="border-0 max-h-60" style={{ background: "#1a1a1a" }}>
+                      {CUBA_PROVINCES.map(p => (
+                        <SelectItem key={p} value={p} className="text-white hover:bg-white/10 text-sm">{p}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs uppercase tracking-wide" style={{ color: "#888" }}>Cantidad</Label>
                   <Input type="number" required min="1" max={product?.stock} value={qty} onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))}
                     className="text-white border-0" style={{ background: "#111" }} />
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs uppercase tracking-wide" style={{ color: "#888" }}>Total</Label>
-                  <div className="h-10 flex items-center px-3 rounded-md font-black text-lg neon-text border" style={{ color: NEON, background: "#0a0a0a", borderColor: NEON_BORDER }}>${total.toFixed(2)}</div>
-                </div>
               </div>
 
+              {/* Total */}
+              <div className="flex items-center justify-between px-4 py-2 rounded-xl border" style={{ borderColor: NEON_BORDER, background: "#050505" }}>
+                <span className="text-sm" style={{ color: "#888" }}>Total a pagar:</span>
+                <span className="font-black text-2xl neon-text" style={{ color: NEON }}>${total.toFixed(2)}</span>
+              </div>
+
+              {/* Payment method */}
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wide" style={{ color: "#888" }}>Método de Pago</Label>
                 <div className="grid grid-cols-3 gap-2">
                   {PAYMENT_METHODS.map(({ id, label, icon: Icon }) => (
                     <button key={id} type="button" onClick={() => setPaymentMethod(id)}
                       className="flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all"
-                      style={{
-                        borderColor: paymentMethod === id ? NEON : "#222",
-                        background: paymentMethod === id ? NEON_DIM : "transparent",
-                      }}>
+                      style={{ borderColor: paymentMethod === id ? NEON : "#222", background: paymentMethod === id ? NEON_DIM : "transparent" }}>
                       <Icon className="h-5 w-5" style={{ color: paymentMethod === id ? NEON : "#555" }} />
                       <span className="text-xs font-bold" style={{ color: paymentMethod === id ? NEON : "#555" }}>{label}</span>
                     </button>
@@ -130,7 +159,7 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
 
               {paymentMethod === "zelle" && (
                 <div className="rounded-xl p-4 border space-y-3" style={{ background: "#050505", borderColor: NEON_BORDER }}>
-                  <p className="text-sm font-bold" style={{ color: "#fff" }}>Datos Zelle GTR CUBAUTO:</p>
+                  <p className="text-sm font-bold text-white">Datos Zelle GTR CUBAUTO:</p>
                   <p className="text-sm">📱 <span className="font-mono" style={{ color: NEON }}>{cfg.zellePhone}</span></p>
                   <p className="text-sm">📧 <span className="font-mono" style={{ color: NEON }}>{cfg.email}</span></p>
                   <div className="space-y-1">
@@ -170,7 +199,7 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
 
               {paymentMethod === "cod" && (
                 <div className="rounded-xl p-4 border space-y-3" style={{ background: "#050505", borderColor: NEON_BORDER }}>
-                  <p className="text-sm"><strong className="text-white">🚚 Pago al recibir.</strong> <span style={{ color: "#888" }}>Un cobrador visitará tu dirección en 24–48 horas.</span></p>
+                  <p className="text-sm"><strong className="text-white">🚚 Pago al recibir.</strong> <span style={{ color: "#888" }}>Un cobrador llegará en 24–48 horas.</span></p>
                   <div className="space-y-1">
                     <Label className="text-xs" style={{ color: "#666" }}>Dirección de entrega</Label>
                     <Input required value={address} onChange={e => setAddress(e.target.value)} placeholder="Calle, No, Ciudad, Provincia"
