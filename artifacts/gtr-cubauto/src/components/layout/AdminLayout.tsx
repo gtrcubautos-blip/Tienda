@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PackageSearch, DollarSign, Percent, ShoppingBag, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, PackageSearch, DollarSign, Percent, ShoppingBag, Settings, LogOut, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { href: "/admin/precios", label: "Precios", icon: DollarSign },
   { href: "/admin/descuentos", label: "Descuentos", icon: Percent },
   { href: "/admin/ventas", label: "Ventas", icon: ShoppingBag },
+  { href: "/admin/social", label: "Redes Sociales", icon: Share2 },
   { href: "/admin/config", label: "Configuración", icon: Settings },
 ];
 
@@ -46,7 +47,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
-              <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive ? "bg-sidebar-primary text-sidebar-primary-foreground" : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}>
+              <Link key={item.href} href={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive ? "bg-sidebar-primary text-sidebar-primary-foreground" : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}>
                 <Icon className="h-4 w-4" />
                 {item.label}
               </Link>
@@ -62,10 +64,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
       <main className="flex-1 flex flex-col overflow-hidden bg-background">
         <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 md:hidden">
-           <span className="font-bold text-lg text-primary">GTR Admin</span>
-           <Button variant="ghost" size="icon" onClick={handleLogout}>
-             <LogOut className="h-5 w-5" />
-           </Button>
+          <span className="font-bold text-lg text-primary">GTR Admin</span>
+          <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <LogOut className="h-5 w-5" />
+          </Button>
         </header>
         <div className="flex-1 overflow-auto p-6 md:p-8">
           {children}

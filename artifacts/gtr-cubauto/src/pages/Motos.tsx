@@ -1,42 +1,17 @@
 import { useState } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
-import { useListProducts, useCreateOrder, getListProductsQueryKey } from "@workspace/api-client-react";
+import { useListProducts } from "@workspace/api-client-react";
 import { ShoppingCart, Bike } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { CheckoutDialog } from "@/components/CheckoutDialog";
 
 const MOTO_PREFIX = "Motos";
 
 export default function Motos() {
   const { data: allProducts, isLoading } = useListProducts();
   const products = allProducts?.filter(p => p.category.startsWith(MOTO_PREFIX));
-  const createOrder = useCreateOrder();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [checkoutProduct, setCheckoutProduct] = useState<typeof allProducts extends (infer T)[] | undefined ? T : never | null>(null);
-  const [clientName, setClientName] = useState("");
-  const [qty, setQty] = useState(1);
-
-  const handleCheckout = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checkoutProduct) return;
-    createOrder.mutate(
-      { data: { clientName: clientName || "Cliente Web", type: "retail", items: [{ productId: checkoutProduct.id, productName: checkoutProduct.name, qty, unitPrice: checkoutProduct.price }] } },
-      {
-        onSuccess: () => {
-          toast({ title: "Orden confirmada", description: "Tu compra se registró automáticamente." });
-          setCheckoutProduct(null); setClientName(""); setQty(1);
-          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
-        },
-        onError: () => toast({ title: "Error", description: "No se pudo procesar la orden.", variant: "destructive" }),
-      }
-    );
-  };
+  const [checkoutProduct, setCheckoutProduct] = useState<{ id: number; name: string; price: number; stock: number } | null>(null);
 
   return (
     <PublicLayout>
@@ -71,14 +46,11 @@ export default function Motos() {
               {products?.map(product => (
                 <div key={product.id} data-testid={`card-moto-${product.id}`} className="group relative rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 hover:border-orange-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/10">
                   <div className="relative h-52 overflow-hidden bg-zinc-800">
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/500x400/1a0a00/e65c1e?text=${encodeURIComponent(product.name.slice(0,12))}`; }} />
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/500x400/1a0a00/e65c1e?text=${encodeURIComponent(product.name.slice(0,12))}`; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent" />
-                    {product.stock < 5 && product.stock > 0 && (
-                      <Badge className="absolute top-3 right-3 bg-red-600 text-white border-0">Últimas unidades</Badge>
-                    )}
-                    {product.stock === 0 && (
-                      <Badge className="absolute top-3 right-3 bg-zinc-700 text-zinc-300 border-0">Agotado</Badge>
-                    )}
+                    {product.stock < 5 && product.stock > 0 && <Badge className="absolute top-3 right-3 bg-red-600 text-white border-0">Últimas unidades</Badge>}
+                    {product.stock === 0 && <Badge className="absolute top-3 right-3 bg-zinc-700 text-zinc-300 border-0">Agotado</Badge>}
                   </div>
                   <div className="p-5">
                     <div className="text-xs text-orange-500 font-bold uppercase tracking-widest mb-1">{product.category.replace("Motos - ", "")}</div>
@@ -88,7 +60,7 @@ export default function Motos() {
                         <div className="text-2xl font-black text-orange-500">${product.price.toFixed(2)}</div>
                         <div className="text-xs text-zinc-500">Stock: {product.stock}</div>
                       </div>
-                      <Button size="sm" disabled={!product.stock} onClick={() => setCheckoutProduct(product as any)}
+                      <Button size="sm" disabled={!product.stock} onClick={() => setCheckoutProduct(product)}
                         className="rounded-full px-4 bg-orange-500 hover:bg-orange-600 text-white border-0">
                         <ShoppingCart className="h-4 w-4 mr-1" /> Comprar
                       </Button>
@@ -101,34 +73,12 @@ export default function Motos() {
         </div>
       </div>
 
-      <Dialog open={!!checkoutProduct} onOpenChange={(open) => !open && setCheckoutProduct(null)}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-white">Confirmar Compra</DialogTitle>
-            <DialogDescription className="text-zinc-400">Completa los datos para procesar tu orden de <strong className="text-white">{checkoutProduct?.name}</strong>.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCheckout} className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Nombre y Apellido</Label>
-              <Input required value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Juan Pérez" className="bg-zinc-800 border-zinc-700 text-white" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-300">Cantidad</Label>
-              <Input type="number" required min="1" max={checkoutProduct?.stock} value={qty} onChange={e => setQty(parseInt(e.target.value) || 1)} className="bg-zinc-800 border-zinc-700 text-white" />
-            </div>
-            <div className="flex justify-between items-center py-3 border-t border-zinc-800">
-              <span className="text-zinc-300 font-semibold">Total:</span>
-              <span className="text-2xl font-black text-orange-500">${((checkoutProduct?.price ?? 0) * qty).toFixed(2)}</span>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setCheckoutProduct(null)} className="border-zinc-700 text-zinc-300">Cancelar</Button>
-              <Button type="submit" disabled={createOrder.isPending} className="bg-orange-500 hover:bg-orange-600 text-white">
-                {createOrder.isPending ? "Procesando..." : "Confirmar Pago"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CheckoutDialog
+        product={checkoutProduct}
+        onClose={() => setCheckoutProduct(null)}
+        accentColor="#e65c1e"
+        accentColorLight="#e65c1e22"
+      />
     </PublicLayout>
   );
 }

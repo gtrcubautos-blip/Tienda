@@ -16,6 +16,7 @@ import Precios from "@/pages/admin/Precios";
 import Descuentos from "@/pages/admin/Descuentos";
 import Ventas from "@/pages/admin/Ventas";
 import Config from "@/pages/admin/Config";
+import SocialMedia from "@/pages/admin/SocialMedia";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/admin/precios" component={Precios} />
       <Route path="/admin/descuentos" component={Descuentos} />
       <Route path="/admin/ventas" component={Ventas} />
+      <Route path="/admin/social" component={SocialMedia} />
       <Route path="/admin/config" component={Config} />
       <Route component={NotFound} />
     </Switch>

@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { href: "/mayorista", label: "Mayorista", icon: Users, color: "#10b981" },
 ];
 
+const GREEN = "#16a34a";
+
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -19,15 +21,13 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 w-full border-b" style={{ background: "rgba(10,10,15,0.95)", borderColor: "rgba(255,255,255,0.07)", backdropFilter: "blur(12px)" }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0" data-testid="link-logo">
-            <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: GREEN }}>
               <Package className="h-4 w-4 text-white" />
             </div>
-            <span className="font-black text-lg tracking-tight text-white">GTR <span className="text-orange-500">CUBAUTO</span></span>
+            <span className="font-black text-lg tracking-tight text-white">GTR <span style={{ color: GREEN }}>CUBAUTO</span></span>
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {NAV_ITEMS.map(({ href, label, icon: Icon, color }) => {
               const isActive = location === href;
@@ -54,14 +54,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                 <LogIn className="h-4 w-4 mr-1.5" /> Admin
               </Link>
             </Button>
-            {/* Mobile menu button */}
             <Button variant="ghost" size="icon" className="md:hidden text-white" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden border-t px-4 py-3 space-y-1" style={{ borderColor: "rgba(255,255,255,0.07)", background: "#0d0d14" }}>
             {NAV_ITEMS.map(({ href, label, icon: Icon, color }) => (
@@ -85,10 +83,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GREEN }}>
                 <Package className="h-3.5 w-3.5 text-white" />
               </div>
-              <span className="font-black text-white">GTR <span className="text-orange-500">CUBAUTO</span></span>
+              <span className="font-black text-white">GTR <span style={{ color: GREEN }}>CUBAUTO</span></span>
             </div>
             <div className="flex items-center gap-6 text-sm text-zinc-500">
               {NAV_ITEMS.map(({ href, label }) => (
