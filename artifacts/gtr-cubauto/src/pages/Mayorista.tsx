@@ -19,7 +19,7 @@ export default function Mayorista() {
               Mercado Mayorista
             </h1>
             <p className="text-lg text-slate-300">
-              Compra en volumen y maximiza tus ganancias. Nuestro programa mayorista ofrece escalas de precios diseñadas para talleres mecánicos, revendedores y flotillas.
+              Compra en volumen y maximiza tus ganancias. Nuestro programa mayorista en Cuba ofrece escalas de precios diseñadas para talleres mecánicos, revendedores y flotillas en toda la isla.
             </p>
             <div className="mt-4">
               <Button size="lg" className="text-lg gap-2">

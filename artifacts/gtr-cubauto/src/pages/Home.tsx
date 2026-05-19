@@ -40,7 +40,7 @@ export default function Home() {
       },
       {
         onSuccess: () => {
-          toast({ title: "Orden confirmada", description: "Tu compra se ha procesado exitosamente." });
+          toast({ title: "Orden confirmada", description: "Tu compra se ha registrado automáticamente en el sistema." });
           setCheckoutProduct(null);
           setClientName("");
           setQty(1);
@@ -60,14 +60,14 @@ export default function Home() {
         <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-white">
-              Piezas de Auto Profesionales <span className="text-primary">Al Instante</span>
+              GTR CUBAUTO <span className="text-primary">Repuestos de Calidad</span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-300 mb-8 max-w-lg">
-              La tienda de repuestos automotrices más confiable de la República Dominicana. Inventario masivo, entregas rápidas y precios competitivos para tu taller.
+              La tienda de repuestos automotrices más confiable de Cuba. Inventario masivo, entregas rápidas y precios competitivos para tu taller.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="text-lg px-8" onClick={() => document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' })}>
-                Ver Ofertas
+                Ver Ofertas de la Semana
               </Button>
             </div>
           </div>

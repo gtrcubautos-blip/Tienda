@@ -35,7 +35,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <main className="flex-1">{children}</main>
       <footer className="border-t bg-card py-6 md:py-0">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between md:h-16 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} GTR CUBAUTO. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} GTR CUBAUTO — Cuba. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

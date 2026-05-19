@@ -1,0 +1,66 @@
+📌 Diseña una página web de comercio electrónico para una tienda de repuestos automotrices llamada "GTR CUBAUTO". 
+
+El diseño debe incluir:
+1. Un encabezado prominente con el nombre "GTR CUBAUTO" en tipografía grande y moderna
+2. Un subtítulo que diga "REPUESTOS DE CALIDAD PARA AUTOS Y MOTOS"
+3. Un texto descriptivo que diga: "Todo para tu vehículo en un solo lugar. Encuentra los mejores repuestos y accesorios con garantía de calidad y los precios más competitivos del mercado"
+4. Un botón llamativo con el texto "Ver Ofertas de la Semana"
+5. Paleta de colores apropiada para una tienda automotriz (posiblemente naranja negro, gris y blanco)
+6. Diseño limpio y profesional que transmita confianza y calidad, moderno, automotriz 
+7. Espacio para eventualmente incluir imágenes de productos automotrices
+
+La página debe ser responsive y tener una estética comercial directa pero atractiva.
+Descripción general de lo que aparece en las imágenes:
+1. Interfaz de administración con menús laterales y secciones de gestión.
+2. Gestión de inventario: listado de productos con precios (ej: "Aceite Motor Sintético SW-30", "$94.50").
+3. Dashboard de ventas: métricas, tendencias, órdenes recientes y comparativas con periodos anteriores.
+4. Gestión de campañas publicitarias: creación y configuración de campañas, presupuestos, segmentación.
+5. Métricas y analytics: ingresos, ventas, productos más vendidos, clientes potenciales.
+6. Gestión de empleados o usuarios: horarios, rendimiento, contactos.
+7. Configuración de notificaciones: alertas por stock bajo, nuevas órdenes, notificaciones por email/SMS.
+8. Información del sistema: versión, base de datos, última actualización, estado.
+
+🎨 Características del diseño:
+* Estilo: Interfaz moderna tipo SaaS (Software as a Service) con colores oscuros (modo oscuro) o claros según la sección.
+* Estructura: Barra lateral con menú desplegable, header con hora y ubicación ("Ciudad Darío"), tarjetas de métricas y tablas de datos.
+* Enfoque: Herramienta de gestión empresarial para autopartes, con énfasis en inventario, ventas y marketing.
+
+🚀 Prompt para recrear este dashboard:
+Crea un dashboard de administración para una empresa de repuestos automotrices llamada "GTR CUBAUTO".
+El diseño debe incluir:
+1. Barra lateral izquierda con menú desplegable con opciones como:
+    * Dashboard
+    * Inventario
+    * Ventas
+    * CRM
+    * Redes Sociales
+    * Analytics
+    * Automatización
+    * Configuración de descuentos
+    * Configuración general
+2. Header superior con:
+    * Nombre de la ciudad ("Ciudad Darío")
+    * Fecha y hora actual ("Today 1:12 PM")
+3. Sección principal con tarjetas de métricas y datos en tiempo real:
+    * Gestión de inventario (productos, precios, stock)
+    * Ventas recientes y tendencias (gráficos comparativos)
+    * Productos más vendidos
+    * Gestión de campañas publicitarias (creación, presupuesto, segmentación)
+    * Notificaciones del sistema (alertas de stock, nuevas órdenes)
+    * Información del sistema (versión, estado, última actualización)
+4. Estilo visual:
+    * Diseño moderno y minimalista
+    * Esquema de colores oscuro o claro (preferiblemente oscuro con acentos en azul, verde o rojo)
+    * Tipografía limpia y legible
+    * Iconos intuitivos para cada sección
+5. Funcionalidades clave:
+    * Tarjetas con métricas resumidas (ventas hoy, vs semana anterior, etc.)
+    * Tablas de datos (inventario, órdenes recientes)
+    * Formularios para crear campañas publicitarias
+    * Alertas y notificaciones visibles
+6. Responsive: Que se adapte a desktop y tablet.
+7. Sistema de api para pagar con carro de compras automatizado. Una billetera dentro de la app donde el dinero se pueda transferir a la cuenta del dueño y esta esté y sea manipulable en la barra lateral izquierda 
+8. Que la barra lateral izquierda solo la vea el duelo y el acceso sea por contraseña.
+9. Seguridad incluida para impedir el rastreo de dinero y que hackeen la cuenta
+10. Que la página configuración general me permita cambiar el formato y desieñl de la página y las imágenes y promociones que se van a poner en el panel principal.
+11. Redes sociales me den la opción de automatizar desde la ah y que se vinculen a las cuenta de redes sociales.
