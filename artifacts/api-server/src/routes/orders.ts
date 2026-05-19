@@ -81,4 +81,25 @@ router.post("/orders", async (req, res): Promise<void> => {
   }
 });
 
+router.patch("/orders/:id", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id);
+  const { status } = req.body as { status: string };
+  if (!["completed", "pending", "cancelled"].includes(status)) {
+    res.status(400).json({ error: "Invalid status" });
+    return;
+  }
+  try {
+    const [updated] = await db
+      .update(ordersTable)
+      .set({ status })
+      .where(eq(ordersTable.id, id))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "Order not found" }); return; }
+    res.json(formatOrder(updated));
+  } catch (err) {
+    req.log.error({ err }, "Failed to update order");
+    res.status(500).json({ error: "Failed to update order" });
+  }
+});
+
 export default router;
