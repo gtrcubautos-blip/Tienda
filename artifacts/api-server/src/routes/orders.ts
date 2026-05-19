@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, ordersTable, productsTable, discountsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and, lt } from "drizzle-orm";
 import { CreateOrderBody } from "@workspace/api-zod";
 
 const router = Router();
@@ -14,8 +14,22 @@ function formatOrder(o: typeof ordersTable.$inferSelect) {
   };
 }
 
+async function expirePendingOrders() {
+  const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  await db
+    .update(ordersTable)
+    .set({ status: "cancelled" })
+    .where(
+      and(
+        eq(ordersTable.status, "pending"),
+        lt(ordersTable.createdAt, cutoff)
+      )
+    );
+}
+
 router.get("/orders", async (req, res): Promise<void> => {
   try {
+    await expirePendingOrders();
     const orders = await db.select().from(ordersTable).orderBy(ordersTable.createdAt);
     res.json(orders.map(formatOrder).reverse());
   } catch (err) {
