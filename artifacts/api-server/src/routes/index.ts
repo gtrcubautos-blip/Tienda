@@ -6,6 +6,7 @@ import discountsRouter from "./discounts";
 import ordersRouter from "./orders";
 import dashboardRouter from "./dashboard";
 import exportRouter from "./export";
+import customersRouter from "./customers";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(discountsRouter);
 router.use(ordersRouter);
 router.use(dashboardRouter);
 router.use(exportRouter);
+router.use("/customers", customersRouter);
 
 export default router;

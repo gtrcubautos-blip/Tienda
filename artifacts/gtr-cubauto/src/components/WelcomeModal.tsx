@@ -101,11 +101,25 @@ export function WelcomeModal() {
     }
   }, []);
 
+  const [submitting, setSubmitting] = useState(false);
+
   const canSubmit = name.trim() && phone.trim() && email.trim() && province && acceptTerms && acceptPrivacy;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    try {
+      await fetch(`${import.meta.env.BASE_URL}api/customers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), phone: phone.trim(), email: email.trim(), province }),
+      });
+    } catch {
+      // Silently continue — registration saves locally regardless
+    } finally {
+      setSubmitting(false);
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ name, phone, email, province, ts: Date.now() }));
     setStep("done");
   };
@@ -273,7 +287,7 @@ export function WelcomeModal() {
                     color: canSubmit ? "#000" : "#555",
                     boxShadow: canSubmit ? `0 0 20px ${NEON}55` : "none",
                   }}>
-                  Confirmar y Entrar a la Tienda
+                  {submitting ? "Guardando..." : "Confirmar y Entrar a la Tienda"}
                 </Button>
                 <p className="text-center text-xs mt-3" style={{ color: "#444" }}>
                   Todos los campos marcados con <span style={{ color: NEON }}>*</span> son obligatorios.

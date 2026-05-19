@@ -221,6 +221,32 @@ export interface OrderInput {
   discountCode?: string;
 }
 
+export interface Customer {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  province: string;
+  createdAt: string;
+}
+
+export interface CustomerInput {
+  name: string;
+  phone: string;
+  email: string;
+  province: string;
+}
+
+export interface CampaignInput {
+  message: string;
+  provinces: string[];
+}
+
+export interface CampaignResult {
+  sent: number;
+  recipients: string[];
+}
+
 export interface DashboardSummary {
   totalRevenue: number;
   totalOrders: number;

@@ -13,6 +13,7 @@ tags:
   - name: discounts
   - name: orders
   - name: dashboard
+  - name: customers
 
 paths:
   /healthz:
@@ -239,6 +240,72 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      summary: List all registered customers
+      responses:
+        "200":
+          description: Customer list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Register a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: Customer registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    delete:
+      operationId: deleteCustomer
+      tags: [customers]
+      summary: Delete a customer record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /customers/campaign:
+    post:
+      operationId: sendCampaign
+      tags: [customers]
+      summary: Log a campaign send to a customer segment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignInput"
+      responses:
+        "200":
+          description: Campaign logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampaignResult"
 
   /dashboard/summary:
     get:
@@ -506,6 +573,58 @@ components:
           enum: [retail, wholesale]
         discountCode:
           type: string
+
+    Customer:
+      type: object
+      required: [id, name, phone, email, province, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        province:
+          type: string
+        createdAt:
+          type: string
+
+    CustomerInput:
+      type: object
+      required: [name, phone, email, province]
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        province:
+          type: string
+
+    CampaignInput:
+      type: object
+      required: [message, provinces]
+      properties:
+        message:
+          type: string
+        provinces:
+          type: array
+          items:
+            type: string
+
+    CampaignResult:
+      type: object
+      required: [sent, recipients]
+      properties:
+        sent:
+          type: integer
+        recipients:
+          type: array
+          items:
+            type: string
 
     DashboardSummary:
       type: object

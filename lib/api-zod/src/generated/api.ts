@@ -247,6 +247,53 @@ export const CreateOrderBody = zod.object({
 
 
 /**
+ * @summary List all registered customers
+ */
+export const ListCustomersResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "province": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListCustomersResponse = zod.array(ListCustomersResponseItem)
+
+
+/**
+ * @summary Register a new customer
+ */
+export const CreateCustomerBody = zod.object({
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "province": zod.string()
+})
+
+
+/**
+ * @summary Delete a customer record
+ */
+export const DeleteCustomerParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Log a campaign send to a customer segment
+ */
+export const SendCampaignBody = zod.object({
+  "message": zod.string(),
+  "provinces": zod.array(zod.string())
+})
+
+export const SendCampaignResponse = zod.object({
+  "sent": zod.number(),
+  "recipients": zod.array(zod.string())
+})
+
+
+/**
  * @summary Get dashboard summary metrics
  */
 export const GetDashboardSummaryResponse = zod.object({

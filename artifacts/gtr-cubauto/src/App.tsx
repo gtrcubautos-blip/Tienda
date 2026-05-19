@@ -18,6 +18,7 @@ import Ventas from "@/pages/admin/Ventas";
 import Config from "@/pages/admin/Config";
 import SocialMedia from "@/pages/admin/SocialMedia";
 import Personalizacion from "@/pages/admin/Personalizacion";
+import Clientes from "@/pages/admin/Clientes";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/admin/precios" component={Precios} />
       <Route path="/admin/descuentos" component={Descuentos} />
       <Route path="/admin/ventas" component={Ventas} />
+      <Route path="/admin/clientes" component={Clientes} />
       <Route path="/admin/social" component={SocialMedia} />
       <Route path="/admin/personalizacion" component={Personalizacion} />
       <Route path="/admin/config" component={Config} />

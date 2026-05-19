@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PackageSearch, DollarSign, Percent, ShoppingBag, Settings, LogOut, Share2, Paintbrush } from "lucide-react";
+import { LayoutDashboard, PackageSearch, DollarSign, Percent, ShoppingBag, Settings, LogOut, Share2, Paintbrush, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { href: "/admin/precios", label: "Precios", icon: DollarSign },
   { href: "/admin/descuentos", label: "Descuentos", icon: Percent },
   { href: "/admin/ventas", label: "Ventas", icon: ShoppingBag },
+  { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/social", label: "Redes Sociales", icon: Share2 },
   { href: "/admin/personalizacion", label: "Personalizar Sitio", icon: Paintbrush },
   { href: "/admin/config", label: "Configuración", icon: Settings },
