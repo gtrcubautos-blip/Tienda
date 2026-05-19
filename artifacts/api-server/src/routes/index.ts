@@ -10,6 +10,8 @@ import customersRouter from "./customers";
 
 const router: IRouter = Router();
 
+// NOTE: honeypot routes are mounted BEFORE this router in app.ts
+// to intercept scanner traffic early.
 router.use(healthRouter);
 router.use(productsRouter);
 router.use(wholesaleRouter);
