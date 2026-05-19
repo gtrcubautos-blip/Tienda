@@ -101,7 +101,7 @@ export function WelcomeModal() {
     }
   }, []);
 
-  const canSubmit = name.trim() && province && acceptTerms && acceptPrivacy;
+  const canSubmit = name.trim() && phone.trim() && email.trim() && province && acceptTerms && acceptPrivacy;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,16 +197,22 @@ export function WelcomeModal() {
               {/* Phone + Email row */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>Teléfono</Label>
-                  <Input value={phone} onChange={e => setPhone(e.target.value)}
+                  <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>
+                    Teléfono <span style={{ color: NEON }}>*</span>
+                  </Label>
+                  <Input required value={phone} onChange={e => setPhone(e.target.value)}
                     placeholder="+53 5 000 0000" type="tel"
-                    className="text-white border-0" style={{ background: "#111" }} />
+                    className="text-white border-0 focus-visible:ring-1 focus-visible:ring-primary"
+                    style={{ background: "#111" }} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>Email</Label>
-                  <Input value={email} onChange={e => setEmail(e.target.value)}
+                  <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>
+                    Email <span style={{ color: NEON }}>*</span>
+                  </Label>
+                  <Input required value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="correo@ejemplo.com" type="email"
-                    className="text-white border-0" style={{ background: "#111" }} />
+                    className="text-white border-0 focus-visible:ring-1 focus-visible:ring-primary"
+                    style={{ background: "#111" }} />
                 </div>
               </div>
 
@@ -270,6 +276,7 @@ export function WelcomeModal() {
                   Confirmar y Entrar a la Tienda
                 </Button>
                 <p className="text-center text-xs mt-3" style={{ color: "#444" }}>
+                  Todos los campos marcados con <span style={{ color: NEON }}>*</span> son obligatorios.
                   Tus datos son confidenciales y nunca serán compartidos con terceros.
                 </p>
               </div>
