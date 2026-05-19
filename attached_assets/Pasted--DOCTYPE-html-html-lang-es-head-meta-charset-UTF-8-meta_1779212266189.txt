@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>GTR CUBAUTO | Repuestos de Calidad</title>
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js CDN para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f4f6fa;
+            overflow-x: hidden;
+        }
+
+        /* ========== ESTILOS GLOBALES ========== */
+        :root {
+            --primary: #e65c1e;   /* naranja automotriz */
+            --primary-dark: #c2450a;
+            --dark: #111214;
+            --gray-dark: #1e1f24;
+            --gray-medium: #2c2e36;
+            --gray-light: #eef2f5;
+            --white: #ffffff;
+            --danger: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        /* Layout principal (tienda + panel admin) */
+        .store-front {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Header tienda */
+        .store-header {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            border-bottom: 4px solid var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .store-header h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--dark) 30%, var(--primary) 80%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-top: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .description {
+            max-width: 750px;
+            margin: 1.2rem auto;
+            color: #2d3e50;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .btn-ofertas {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 14px 32px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 18px rgba(230, 92, 30, 0.3);
+            margin: 1rem 0 2rem;
+        }
+
+        .btn-ofertas:hover {
+            background: var(--primary-dark);
+            transform: scale(1.02);
+        }
+
+        /* productos placeholder */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.8rem;
+            margin: 2rem 0;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            transition: 0.2s;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        .product-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
+            background: #f8f9fa;
+            border-radius: 16px;
+        }
+        .product-card h3 {
+            margin: 0.8rem 0 0.3rem;
+        }
+        .price {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        /* ADMIN PANEL (solo visible con login) */
+        .admin-panel {
+            display: none;
+            background: var(--gray-dark);
+            min-height: 100vh;
+            color: #eef2ff;
+        }
+
+        .admin-container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Sidebar solo dueño */
+        .sidebar {
+            width: 280px;
+            background: #0b0c10;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            transition: 0.2s;
+            padding: 1.5rem 1rem;
+        }
+
+        .sidebar-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            padding-left: 0.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+        .sidebar-menu li {
+            margin: 0.8rem 0;
+            padding: 0.7rem 1rem;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+        .sidebar-menu li i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+        .sidebar-menu li:hover, .sidebar-menu .active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* main content admin */
+        .admin-main {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            overflow-x: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #1e1f24;
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .city-time {
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: #3a3c44;
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        /* metric cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            background: #25262e;
+            padding: 1.2rem;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* tabla inventario */
+        .data-table {
+            width: 100%;
+            background: #1e1f24;
+            border-radius: 20px;
+            padding: 1rem;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #2c2e36;
+        }
+        .badge {
+            background: var(--primary);
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+        }
+        button.small-btn {
+            background: var(--primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* formularios campaña */
+        .campaign-form {
+            background: #1e1f24;
+            padding: 1.5rem;
+            border-radius: 24px;
+            margin-bottom: 2rem;
+        }
+        input, select, textarea {
+            background: #2c2e36;
+            border: 1px solid #3f424b;
+            padding: 10px;
+            border-radius: 12px;
+            color: white;
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        /* Wallet */
+        .wallet-card {
+            background: linear-gradient(145deg, #0f0f14, #1a1b22);
+            border-radius: 28px;
+            padding: 1.2rem;
+        }
+
+        @media (max-width: 780px) {
+            .admin-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .store-header h1 { font-size: 2.5rem; }
+        }
+        .notification-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f2937;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            z-index: 999;
+            border-left: 5px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<!-- VISTA PÚBLICA TIENDA -->
+<div id="storeView" class="store-front">
+    <div class="store-header">
+        <h1>GTR CUBAUTO</h1>
+        <div class="subtitle">REPUESTOS DE CALIDAD PARA AUTOS Y MOTOS</div>
+        <div class="description">
+            Todo para tu vehículo en un solo lugar. Encuentra los mejores repuestos y accesorios con garantía de calidad y los precios más competitivos del mercado.
+        </div>
+        <button class="btn-ofertas" id="openOffersBtn">🔥 Ver Ofertas de la Semana</button>
+    </div>
+
+    <!-- Espacio productos dinámicos (cargados desde configuración/inventario) -->
+    <div id="productosTienda" class="product-grid">
+        <!-- Aquí se renderizan productos vía JS -->
+    </div>
+</div>
+
+<!-- PANEL ADMIN (oculto inicialmente, solo con contraseña correcta) -->
+<div id="adminPanel" class="admin-panel">
+    <div class="admin-container">
+        <div class="sidebar">
+            <div class="sidebar-logo">GTR ADMIN</div>
+            <ul class="sidebar-menu" id="adminMenu">
+                <li data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
+                <li data-section="inventario"><i class="fas fa-boxes"></i> Inventario</li>
+                <li data-section="ventas"><i class="fas fa-chart-line"></i> Ventas</li>
+                <li data-section="crm"><i class="fas fa-users"></i> CRM</li>
+                <li data-section="social"><i class="fab fa-instagram"></i> Redes Sociales</li>
+                <li data-section="analytics"><i class="fas fa-chart-pie"></i> Analytics</li>
+                <li data-section="automation"><i class="fas fa-robot"></i> Automatización</li>
+                <li data-section="descuentos"><i class="fas fa-tags"></i> Descuentos</li>
+                <li data-section="config"><i class="fas fa-cog"></i> Config. General</li>
+                <li data-section="wallet"><i class="fas fa-wallet"></i> Billetera / Pagos</li>
+            </ul>
+            <div style="margin-top: 2rem; padding: 0.5rem; font-size: 0.75rem; color: gray;">
+                <i class="fas fa-shield-alt"></i> Seguridad reforzada
+            </div>
+        </div>
+        <div class="admin-main">
+            <div class="top-bar">
+                <div class="city-time"><i class="fas fa-map-marker-alt"></i> Ciudad Darío &nbsp;|&nbsp; <span id="liveDateTime"></span></div>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+            </div>
+            <div id="dynamicAdminContent">
+                <!-- Aquí se carga cada sección dinámica -->
+                Cargando...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- SEGURIDAD: solo acceso por contraseña (dueño) ----------
+    let adminAuthorized = false;
+    const OWNER_PASSWORD = "GTR2025Auto";  // contraseña de acceso al panel
+
+    // Almacenamiento simulado (backend en memoria)
+    let inventory = [
+        { id: 1, name: "Aceite Motor Sintético 5W-30", price: 94.5, stock: 45, image: "https://placehold.co/400x300?text=Aceite+Motor" },
+        { id: 2, name: "Filtro de Aire Deportivo", price: 28.9, stock: 22, image: "https://placehold.co/400x300?text=Filtro+Aire" },
+        { id: 3, name: "Pastillas de Freno Cerámicas", price: 52.3, stock: 38, image: "https://placehold.co/400x300?text=Pastillas+Freno" },
+        { id: 4, name: "Bujía Iridio (x4)", price: 41.2, stock: 10, image: "https://placehold.co/400x300?text=Bujias" }
+    ];
+
+    let salesOrders = [
+        { id: 101, cliente: "Carlos M.", total: 94.5, fecha: "2025-04-01", estado: "Completado" },
+        { id: 102, cliente: "Lucía G.", total: 81.2, fecha: "2025-04-02", estado: "Completado" }
+    ];
+
+    let campaigns = [
+        { nombre: "Semana Santa", presupuesto: 500, segmentacion: "Automotriz", activa: true }
+    ];
+
+    let walletBalance = 12450.80;  // saldo disponible para transferir al dueño
+    let socialAccounts = { instagram: "gtr_cubauto", facebook: "gtrcubauto", autoPost: false };
+
+    let storeConfig = {
+        bannerTitle: "REPUESTOS DE ALTA GAMA",
+        primaryColor: "#e65c1e",
+        showPromo: true,
+        promoText: "10% OFF con transferencia"
+    };
+
+    // Helper para notificar
+    function showNotif(msg, type = "info") {
+        const notif = document.createElement("div");
+        notif.className = "notification-toast";
+        notif.innerHTML = `<i class="fas fa-bell"></i> ${msg}`;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    // Renderizar productos en tienda pública
+    function renderStoreProducts() {
+        const container = document.getElementById("productosTienda");
+        if (!container) return;
+        container.innerHTML = inventory.map(p => `
+            <div class="product-card">
+                <img src="${p.image}" alt="${p.name}">
+                <h3>${p.name}</h3>
+                <div class="price">$${p.price.toFixed(2)}</div>
+                <button class="small-btn" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> Comprar</button>
+            </div>
+        `).join('');
+    }
+
+    window.addToCart = function(productId) {
+        // simulador de carrito y pago api (billetera integrada)
+        const product = inventory.find(p => p.id === productId);
+        if(!product) return;
+        if(product.stock <=0) { showNotif("Sin stock", "error"); return; }
+        // Simular pago desde billetera del dueño? Realmente se crea una orden y se acredita a la wallet.
+        const amount = product.price;
+        if(confirm(`Agregar ${product.name} por $${amount} ¿Deseas pagar con Wallet GTR? (saldo disponible: $${walletBalance.toFixed(2)})`)){
+            // proceso de compra simulado - API de carrito
+            walletBalance += amount;   // Dueño recibe el dinero (en realidad incrementa)
+            product.stock -= 1;
+            salesOrders.unshift({ id: Date.now(), cliente: "Cliente Web", total: amount, fecha: new Date().toISOString().slice(0,10), estado: "Pagado" });
+            renderStoreProducts();
+            showNotif(`Compra exitosa. Se agregó $${amount} a la billetera del dueño.`);
+            if(adminAuthorized && document.getElementById("dynamicAdminContent")) renderAdminSection("dashboard");
+        }
+    };
+
+    // Renderizar secciones del admin
+    function renderAdminSection(section) {
+        const adminContainer = document.getElementById("dynamicAdminContent");
+        if(!adminContainer) return;
+        switch(section) {
+            case 'dashboard':
+                adminContainer.innerHTML = `
+                    <div class="metrics-grid">
+                        <div class="metric-card"><div><i class="fas fa-chart-simple"></i> Ventas hoy</div><strong>$${(salesOrders.reduce((a,b)=>a+b.total,0)).toFixed(2)}</strong></div>
+                        <div class="metric-card"><div><i class="fas fa-chart-line"></i> vs semana pasada</div><strong>+12%</strong></div>
+                        <div class="metric-card"><div><i class="fas fa-box"></i> Stock total</div><strong>${inventory.reduce((a,b)=>a+b.stock,0)}</strong></div>
+                    </div>
+                    <h3>Productos más vendidos</h3>
+                    <ul>${inventory.map(p=>`<li>${p.name} - $${p.price} (stock: ${p.stock})</li>`).join('')}</ul>
+                    <h3>Órdenes recientes</h3>
+                    <table class="data-table"><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th></tr>
+                    ${salesOrders.slice(0,5).map(o=>`<tr><td>${o.id}</td><td>${o.cliente}</td><td>$${o.total}</td><td><span class="badge">${o.estado}</span></td></tr>`).join('')}
+                    </table>
+                    <div class="campaign-form"><h4>Gestión campañas publicitarias</h4>
+                    <input type="text" id="campName" placeholder="Nombre campaña"><input type="number" id="campBudget" placeholder="Presupuesto"><input id="campSegment" placeholder="Segmentación">
+                    <button class="small-btn" onclick="createCampaign()">Crear campaña</button>
+                    <div id="campaignsList">${campaigns.map(c=>`<p>📢 ${c.nombre} | $${c.presupuesto} | ${c.segmentacion}</p>`).join('')}</div>
+                    </div>
+                `;
+                break;
+            case 'inventario':
+                adminContainer.innerHTML = `<h2>Gestión de Inventario</h2>
+                <table class="data-table"><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Imagen</th><th>Acciones</th></tr>
+                ${inventory.map(p=>`<tr><td>${p.id}</td><td><input type="text" id="name-${p.id}" value="${p.name}"></td><td><input type="number" id="price-${p.id}" value="${p.price}"></td><td><input type="number" id="stock-${p.id}" value="${p.stock}"></td><td><input type="text" id="img-${p.id}" value="${p.image}"></td><td><button class="small-btn" onclick="updateProduct(${p.id})">Actualizar</button></td></tr>`).join('')}
+                </table>
+                <button class="small-btn" onclick="addNewProduct()">➕ Nuevo producto</button>`;
+                break;
+            case 'wallet':
+                adminContainer.innerHTML = `<div class="wallet-card"><h2>💰 Billetera Digital GTR</h2>
+                <h1 style="color:var(--primary)">$${walletBalance.toFixed(2)} USD</h1>
+                <button class="small-btn" id="transferToOwnerBtn"><i class="fas fa-exchange-alt"></i> Transferir saldo a cuenta del dueño</button>
+                <p style="margin-top:1rem">Cada venta en tienda acredita automáticamente a esta wallet. Puedes retirar a cuenta bancaria.</p>
+                </div>`;
+                setTimeout(()=>{
+                    document.getElementById("transferToOwnerBtn")?.addEventListener("click", ()=>{
+                        if(walletBalance > 0){
+                            alert(`Simulación de transferencia bancaria: $${walletBalance} enviados a la cuenta del dueño.`);
+                            walletBalance = 0;
+                            renderAdminSection('wallet');
+                            showNotif("Transferencia completada con éxito (API bancaria simulada)");
+                        } else alert("Saldo insuficiente");
+                    });
+                }, 50);
+                break;
+            case 'social':
+                adminContainer.innerHTML = `<h2>Automatización de Redes Sociales</h2>
+                <div class="campaign-form"><label>Instagram: </label><input id="igUser" value="${socialAccounts.instagram}"><label>Facebook: </label><input id="fbUser" value="${socialAccounts.facebook}"><label>Auto-publicación de ofertas</label><input type="checkbox" id="autoPostCB" ${socialAccounts.autoPost ? 'checked' : ''}>
+                <button class="small-btn" onclick="saveSocialSettings()">Guardar y Vincular API</button>
+                <p><i class="fab fa-instagram"></i> Programar publicación automática cada semana (simulación)</p>
+                <button class="small-btn" onclick="simulateAutoPost()">Probar automatización</button>
+                </div>`;
+                break;
+            case 'config':
+                adminContainer.innerHTML = `<h2>Configuración General / Diseño</h2>
+                <div class="campaign-form"><label>Título tienda:</label><input id="configStoreTitle" value="GTR CUBAUTO"><label>Color primario (naranja/rojo):</label><input type="color" id="primaryColorPicker" value="${storeConfig.primaryColor}"><label>¿Mostrar promo flotante?</label><input type="checkbox" id="showPromoCheck" ${storeConfig.showPromo ? 'checked':''}><label>Texto promoción:</label><input id="promoText" value="${storeConfig.promoText}">
+                <button class="small-btn" onclick="saveGeneralConfig()">Aplicar cambios visuales</button>
+                <hr><h3>Imágenes de productos destacados (subir demo)</h3><button class="small-btn" onclick="refreshStoreFromConfig()">Refrescar tienda</button></div>`;
+                break;
+            default: adminContainer.innerHTML = `<h3>Sección en construcción</h3><p>CRM / Analytics avanzado disponible pronto</p>`;
+        }
+    }
+
+    // funciones helper admin CRUD
+    window.updateProduct = (id) => {
+        let product = inventory.find(p=>p.id===id);
+        if(product){
+            product.name = document.getElementById(`name-${id}`).value;
+            product.price = parseFloat(document.getElementById(`price-${id}`).value);
+            product.stock = parseInt(document.getElementById(`stock-${id}`).value);
+            product.image = document.getElementById(`img-${id}`).value;
+            renderStoreProducts();
+            showNotif("Inventario actualizado + tienda sincronizada");
+            renderAdminSection('inventario');
+        }
+    };
+    window.addNewProduct = () => {
+        let newId = Date.now();
+        inventory.push({id:newId, name:"Nuevo repuesto", price:0, stock:0, image:"https://placehold.co/400x300?text=Auto+Part"});
+        renderAdminSection('inventario');
+    };
+    window.createCampaign = () => {
+        let name = document.getElementById("campName")?.value;
+        let budget = document.getElementById("campBudget")?.value;
+        let seg = document.getElementById("campSegment")?.value;
+        if(name && budget) campaigns.push({nombre:name, presupuesto:+budget, segmentacion:seg, activa:true});
+        renderAdminSection('dashboard');
+        showNotif("Campaña creada con presupuesto desde API");
+    };
+    window.saveSocialSettings = () => {
+        socialAccounts.instagram = document.getElementById("igUser")?.value;
+        socialAccounts.facebook = document.getElementById("fbUser")?.value;
+        socialAccounts.autoPost = document.getElementById("autoPostCB")?.checked;
+        showNotif("Cuentas vinculadas (simulación API Meta/IG)");
+    };
+    window.simulateAutoPost = () => {
+        showNotif("Automatización: Se publicó 'Ofertas del mes' en Instagram y Facebook.");
+    };
+    window.saveGeneralConfig = () => {
+        storeConfig.primaryColor = document.getElementById("primaryColorPicker").value;
+        storeConfig.showPromo = document.getElementById("showPromoCheck").checked;
+        storeConfig.promoText = document.getElementById("promoText").value;
+        document.documentElement.style.setProperty('--primary', storeConfig.primaryColor);
+        renderStoreProducts();
+        showNotif("Estilo & promociones actualizados en tiempo real");
+    };
+    window.refreshStoreFromConfig = () => { renderStoreProducts(); };
+
+    // Autenticación: se muestra prompt al cargar para dueño
+    function promptAdminAccess() {
+        let pwd = prompt("🔐 Acceso exclusivo para el dueño de GTR CUBAUTO. Ingrese contraseña:");
+        if(pwd === OWNER_PASSWORD){
+            adminAuthorized = true;
+            document.getElementById("storeView").style.display = "none";
+            document.getElementById("adminPanel").style.display = "block";
+            renderAdminSection("dashboard");
+            // mostrar métricas en tiempo real
+            setInterval(()=>{
+                if(adminAuthorized) {
+                    let now = new Date();
+                    document.getElementById("liveDateTime") && (document.getElementById("liveDateTime").innerText = now.toLocaleDateString() + " " + now.toLocaleTimeString());
+                }
+            },1000);
+        } else {
+            if(pwd !== null) alert("Contraseña incorrecta. Acceso denegado.");
+            adminAuthorized = false;
+        }
+    }
+    document.getElementById("logoutBtn")?.addEventListener("click",()=>{
+        adminAuthorized=false;
+        document.getElementById("adminPanel").style.display = "none";
+        document.getElementById("storeView").style.display = "block";
+        showNotif("Sesión de administración cerrada con seguridad.");
+    });
+    document.getElementById("openOffersBtn")?.addEventListener("click", ()=>{
+        alert("🔥 Ofertas especiales: 15% en filtros y aceites. Usa tu Wallet dentro del panel de administración.");
+    });
+
+    // Navegación menu admin
+    document.getElementById("adminMenu")?.addEventListener("click", (e)=>{
+        let target = e.target.closest("li");
+        if(target && target.dataset.section){
+            renderAdminSection(target.dataset.section);
+        }
+    });
+
+    // inicializar tienda y evento acceso dueño (se muestra botón oculto o combinación)
+    setTimeout(()=>{
+        renderStoreProducts();
+        // Agregar acceso rápido mediante tecla (Ctrl+Shift+A) o simplemente prompt al hacer doble click en logo
+        const headerTitle = document.querySelector(".store-header h1");
+        if(headerTitle){
+            headerTitle.addEventListener("dblclick", ()=>{
+                promptAdminAccess();
+            });
+        }
+        // Hora inicial
+        if(document.getElementById("liveDateTime")){
+            setInterval(()=>{
+                if(document.getElementById("liveDateTime"))
+                    document.getElementById("liveDateTime").innerText = new Date().toLocaleString();
+            },1000);
+        }
+    },100);
+    // API extra para notificaciones de stock bajo
+    setInterval(()=>{
+        let lowStock = inventory.filter(p=>p.stock<5);
+        if(lowStock.length && adminAuthorized) showNotif(`⚠️ Stock bajo: ${lowStock.map(p=>p.name).join(", ")}`);
+    }, 30000);
+</script>
+</body>
+</html>

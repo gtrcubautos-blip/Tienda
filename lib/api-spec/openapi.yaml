@@ -1,22 +1,25 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: GTR CUBAUTO API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: products
+  - name: wholesale
+  - name: discounts
+  - name: orders
+  - name: dashboard
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +27,503 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products
+      responses:
+        "200":
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /products/{id}/price:
+    patch:
+      operationId: updateProductPrice
+      tags: [products]
+      summary: Update retail and wholesale price for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PriceUpdate"
+      responses:
+        "200":
+          description: Price updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /wholesale/products:
+    get:
+      operationId: listWholesaleProducts
+      tags: [wholesale]
+      summary: List products with wholesale pricing and tiers
+      responses:
+        "200":
+          description: Wholesale product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WholesaleProduct"
+
+  /discounts:
+    get:
+      operationId: listDiscounts
+      tags: [discounts]
+      summary: List all discount rules
+      responses:
+        "200":
+          description: Discount list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Discount"
+    post:
+      operationId: createDiscount
+      tags: [discounts]
+      summary: Create a discount rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DiscountInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Discount"
+
+  /discounts/{id}:
+    patch:
+      operationId: updateDiscount
+      tags: [discounts]
+      summary: Update a discount rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DiscountUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Discount"
+    delete:
+      operationId: deleteDiscount
+      tags: [discounts]
+      summary: Delete a discount rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List all orders
+      responses:
+        "200":
+          description: Order list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create an order (purchase)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary metrics
+      responses:
+        "200":
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Product:
+      type: object
+      required: [id, name, price, stock, image, wholesalePrice, minWholesaleQty, category]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+          description: Retail price
+        wholesalePrice:
+          type: number
+          description: Wholesale price per unit
+        minWholesaleQty:
+          type: integer
+          description: Minimum quantity for wholesale price
+        stock:
+          type: integer
+        image:
+          type: string
+        category:
+          type: string
+        description:
+          type: ["string", "null"]
+
+    ProductInput:
+      type: object
+      required: [name, price, wholesalePrice, minWholesaleQty, stock, image, category]
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        wholesalePrice:
+          type: number
+        minWholesaleQty:
+          type: integer
+        stock:
+          type: integer
+        image:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        wholesalePrice:
+          type: number
+        minWholesaleQty:
+          type: integer
+        stock:
+          type: integer
+        image:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+
+    PriceUpdate:
+      type: object
+      properties:
+        price:
+          type: number
+        wholesalePrice:
+          type: number
+        minWholesaleQty:
+          type: integer
+
+    WholesaleProduct:
+      type: object
+      required: [id, name, price, wholesalePrice, minWholesaleQty, stock, image, category, tiers]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+        wholesalePrice:
+          type: number
+        minWholesaleQty:
+          type: integer
+        stock:
+          type: integer
+        image:
+          type: string
+        category:
+          type: string
+        tiers:
+          type: array
+          items:
+            $ref: "#/components/schemas/PriceTier"
+
+    PriceTier:
+      type: object
+      required: [minQty, price, label]
+      properties:
+        minQty:
+          type: integer
+        price:
+          type: number
+        label:
+          type: string
+
+    Discount:
+      type: object
+      required: [id, name, type, value, active, appliesTo, minAmount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [percentage, fixed, wholesale_tier]
+        value:
+          type: number
+          description: Percentage (0-100) or fixed dollar amount
+        active:
+          type: boolean
+        appliesTo:
+          type: string
+          enum: [all, retail, wholesale, category]
+        category:
+          type: ["string", "null"]
+        minAmount:
+          type: number
+          description: Minimum order amount to apply discount
+        expiresAt:
+          type: ["string", "null"]
+
+    DiscountInput:
+      type: object
+      required: [name, type, value, active, appliesTo, minAmount]
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        type:
+          type: string
+          enum: [percentage, fixed, wholesale_tier]
+        value:
+          type: number
+        active:
+          type: boolean
+        appliesTo:
+          type: string
+          enum: [all, retail, wholesale, category]
+        category:
+          type: string
+        minAmount:
+          type: number
+        expiresAt:
+          type: string
+
+    DiscountUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        type:
+          type: string
+          enum: [percentage, fixed, wholesale_tier]
+        value:
+          type: number
+        active:
+          type: boolean
+        appliesTo:
+          type: string
+          enum: [all, retail, wholesale, category]
+        category:
+          type: string
+        minAmount:
+          type: number
+        expiresAt:
+          type: string
+
+    Order:
+      type: object
+      required: [id, clientName, items, total, type, status, createdAt]
+      properties:
+        id:
+          type: integer
+        clientName:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        total:
+          type: number
+        type:
+          type: string
+          enum: [retail, wholesale]
+        status:
+          type: string
+          enum: [pending, completed, cancelled]
+        discountApplied:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+
+    OrderItem:
+      type: object
+      required: [productId, productName, qty, unitPrice]
+      properties:
+        productId:
+          type: integer
+        productName:
+          type: string
+        qty:
+          type: integer
+        unitPrice:
+          type: number
+
+    OrderInput:
+      type: object
+      required: [clientName, items, type]
+      properties:
+        clientName:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        type:
+          type: string
+          enum: [retail, wholesale]
+        discountCode:
+          type: string
+
+    DashboardSummary:
+      type: object
+      required: [totalRevenue, totalOrders, totalRetailOrders, totalWholesaleOrders, totalStock, lowStockCount, activeDiscounts, revenueToday]
+      properties:
+        totalRevenue:
+          type: number
+        totalOrders:
+          type: integer
+        totalRetailOrders:
+          type: integer
+        totalWholesaleOrders:
+          type: integer
+        totalStock:
+          type: integer
+        lowStockCount:
+          type: integer
+        activeDiscounts:
+          type: integer
+        revenueToday:
+          type: number

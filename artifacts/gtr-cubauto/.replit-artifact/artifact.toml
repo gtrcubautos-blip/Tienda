@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "GTR CUBAUTO"
+version = "1.0.0"
+id = "artifacts/gtr-cubauto"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20806
+
+[services.development]
+run = "pnpm --filter @workspace/gtr-cubauto run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/gtr-cubauto", "run", "build" ]
+publicDir = "artifacts/gtr-cubauto/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20806"
+BASE_PATH = "/"
