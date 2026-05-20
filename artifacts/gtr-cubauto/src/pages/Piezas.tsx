@@ -39,8 +39,8 @@ export default function Piezas() {
             </div>
             <span className="font-black tracking-widest uppercase text-sm" style={{ color: NEON }}>Catálogo Completo</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight" style={{ textShadow: `0 0 40px ${NEON}33` }}>PIEZAS</h1>
-          <p className="text-lg mt-2" style={{ color: "#555" }}>Repuestos universales para autos y motos en un solo catálogo</p>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight" style={{ textShadow: `0 0 40px ${NEON}33` }}>PIEZAS</h1>
+          <p className="text-sm sm:text-lg mt-2" style={{ color: "#555" }}>Repuestos universales para autos y motos en un solo catálogo</p>
         </div>
       </div>
 
@@ -78,13 +78,13 @@ export default function Piezas() {
           )}
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
               {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="h-80 rounded-2xl animate-pulse" style={{ background: "#111" }} />)}
             </div>
           ) : products?.length === 0 ? (
             <div className="text-center py-20 text-lg" style={{ color: "#555" }}>No se encontraron productos.</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
               {products?.map(product => (
                 <div key={product.id} data-testid={`card-pieza-${product.id}`}
                   className="group rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col"

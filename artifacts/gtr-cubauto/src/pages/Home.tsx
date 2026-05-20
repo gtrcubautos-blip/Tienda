@@ -43,25 +43,25 @@ export default function Home() {
         {/* Neon scan line effect */}
         <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${NEON}, transparent)`, opacity: 0.4 }} />
 
-        <div className="relative z-10 container mx-auto px-6 py-24 flex flex-col lg:flex-row items-center gap-12">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-24 flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
           {/* LEFT TEXT */}
-          <div className="flex-1 max-w-2xl">
-            <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full border text-sm font-bold tracking-widest uppercase" style={{ borderColor: NEON_BORDER, background: NEON_DIM, color: NEON }}>
+          <div className="flex-1 max-w-2xl w-full">
+            <div className="inline-flex items-center gap-2 mb-4 sm:mb-6 px-3 sm:px-4 py-1.5 rounded-full border text-[10px] sm:text-sm font-bold tracking-widest uppercase" style={{ borderColor: NEON_BORDER, background: NEON_DIM, color: NEON }}>
               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON }} />
               TIENDA ONLINE EN CUBA
             </div>
-            <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-white leading-none mb-4">
+            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white leading-none mb-3 sm:mb-4 break-words">
               GTR<br />
               <span className="neon-text" style={{ color: NEON }}>{config.heroTitle.includes("CUBAUTO") ? "CUBAUTO" : config.heroTitle}</span>
             </h1>
-            <p className="text-xl font-bold text-white/75 mb-3 tracking-wide uppercase">{config.heroSubtitle}</p>
-            <p className="text-base text-white/45 mb-10 max-w-xl leading-relaxed">{config.heroDescription}</p>
-            <div className="flex flex-wrap gap-4">
-              <Button asChild size="lg" className="text-base px-8 py-6 rounded-full font-black text-black neon-glow border-0"
+            <p className="text-base sm:text-xl font-bold text-white/75 mb-2 sm:mb-3 tracking-wide uppercase">{config.heroSubtitle}</p>
+            <p className="text-sm sm:text-base text-white/45 mb-6 sm:mb-10 max-w-xl leading-relaxed">{config.heroDescription}</p>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+              <Button asChild size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 rounded-full font-black text-black neon-glow border-0"
                 style={{ background: NEON }}>
                 <Link href="/piezas">Ver Catálogo <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="text-base px-8 py-6 rounded-full font-bold text-white"
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 rounded-full font-bold text-white"
                 style={{ borderColor: NEON_BORDER, background: "transparent" }}>
                 <Link href="/mayorista">Precios Mayorista</Link>
               </Button>

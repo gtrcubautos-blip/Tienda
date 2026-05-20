@@ -88,7 +88,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="md:hidden px-4 py-3 space-y-1" style={{ background: "#050505", borderTop: `1px solid ${NEON_BORDER}` }}>
+          <div className="md:hidden px-4 py-3 space-y-1 max-h-[calc(100dvh-4rem)] overflow-y-auto" style={{ background: "#050505", borderTop: `1px solid ${NEON_BORDER}` }}>
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"

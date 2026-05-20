@@ -21,9 +21,9 @@ const NEON_DIM = "#00ff4115";
 const NEON_BORDER = "#00ff4130";
 
 const PAYMENT_METHODS = [
-  { id: "zelle", label: "Zelle", icon: Smartphone },
-  { id: "card", label: "Tarjeta", icon: CreditCard },
-  { id: "cod", label: "Contra Entrega", icon: Truck },
+  { id: "zelle", label: "Zelle", shortLabel: "Zelle", icon: Smartphone },
+  { id: "card", label: "Tarjeta", shortLabel: "Tarjeta", icon: CreditCard },
+  { id: "cod", label: "Contra Entrega", shortLabel: "Contra Entr.", icon: Truck },
 ] as const;
 type PaymentMethod = typeof PAYMENT_METHODS[number]["id"];
 
@@ -286,13 +286,16 @@ export function CartDrawer() {
               {/* Payment */}
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wide" style={{ color: "#888" }}>Método de Pago</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {PAYMENT_METHODS.map(({ id, label, icon: Icon }) => (
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                  {PAYMENT_METHODS.map(({ id, label, shortLabel, icon: Icon }) => (
                     <button key={id} type="button" onClick={() => setPaymentMethod(id)}
-                      className="flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all"
+                      className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl border text-center transition-all min-w-0"
                       style={{ borderColor: paymentMethod === id ? NEON : "#222", background: paymentMethod === id ? NEON_DIM : "transparent" }}>
-                      <Icon className="h-5 w-5" style={{ color: paymentMethod === id ? NEON : "#555" }} />
-                      <span className="text-xs font-bold" style={{ color: paymentMethod === id ? NEON : "#555" }}>{label}</span>
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" style={{ color: paymentMethod === id ? NEON : "#555" }} />
+                      <span className="text-[10px] sm:text-xs font-bold leading-tight" style={{ color: paymentMethod === id ? NEON : "#555" }}>
+                        <span className="sm:hidden">{shortLabel}</span>
+                        <span className="hidden sm:inline">{label}</span>
+                      </span>
                     </button>
                   ))}
                 </div>

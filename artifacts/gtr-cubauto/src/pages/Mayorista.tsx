@@ -29,7 +29,7 @@ export default function Mayorista() {
         <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON}08 0%, transparent 60%)` }} />
         <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${NEON}60, transparent)` }} />
 
-        <div className="relative z-10 container mx-auto px-6 py-16">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-10 sm:py-16">
           <div className="max-w-3xl flex flex-col gap-5">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center neon-glow" style={{ background: NEON }}>
@@ -40,10 +40,10 @@ export default function Mayorista() {
                 Para Distribuidores y Talleres
               </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight" style={{ textShadow: `0 0 40px ${NEON}22` }}>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight break-words" style={{ textShadow: `0 0 40px ${NEON}22` }}>
               MERCADO<br /><span style={{ color: NEON }}>MAYORISTA</span>
             </h1>
-            <p className="text-lg" style={{ color: "#666" }}>
+            <p className="text-base sm:text-lg" style={{ color: "#666" }}>
               Compra en volumen y maximiza tus ganancias. Precios escalonados diseñados para talleres mecánicos, revendedores y flotillas en toda Cuba.
             </p>
 
@@ -128,32 +128,57 @@ export default function Mayorista() {
                       <div className="text-lg font-black text-white">${product.price.toFixed(2)}</div>
                     </div>
                   </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow style={{ borderColor: "#1a1a1a" }}>
-                        <TableHead style={{ color: "#555" }}>Volumen</TableHead>
-                        <TableHead className="text-right" style={{ color: "#555" }}>Precio Unitario</TableHead>
-                        <TableHead className="text-right" style={{ color: "#555" }}>Ahorro</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {product.tiers.map((tier, idx) => {
-                        const savings = ((product.price - tier.price) / product.price) * 100;
-                        return (
-                          <TableRow key={idx} style={{ borderColor: "#1a1a1a" }}>
-                            <TableCell className="font-bold text-white">{tier.label}</TableCell>
-                            <TableCell className="text-right font-black text-lg" style={{ color: NEON }}>${tier.price.toFixed(2)}</TableCell>
-                            <TableCell className="text-right">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold"
-                                style={{ background: `${NEON}18`, color: NEON, border: `1px solid ${NEON}33` }}>
-                                -{savings.toFixed(0)}%
-                              </span>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                  {/* Mobile: card list */}
+                  <div className="sm:hidden divide-y divide-[#1a1a1a]">
+                    {product.tiers.map((tier, idx) => {
+                      const savings = ((product.price - tier.price) / product.price) * 100;
+                      return (
+                        <div key={idx} className="flex items-center justify-between px-4 py-3 gap-3" style={{ borderColor: "#1a1a1a" }}>
+                          <div className="min-w-0">
+                            <div className="text-xs uppercase tracking-wide mb-0.5" style={{ color: "#555" }}>Volumen</div>
+                            <div className="font-bold text-white text-sm truncate">{tier.label}</div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="font-black text-base leading-none" style={{ color: NEON }}>${tier.price.toFixed(2)}</div>
+                            <span className="inline-flex items-center mt-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                              style={{ background: `${NEON}18`, color: NEON, border: `1px solid ${NEON}33` }}>
+                              -{savings.toFixed(0)}%
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Desktop: table */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow style={{ borderColor: "#1a1a1a" }}>
+                          <TableHead style={{ color: "#555" }}>Volumen</TableHead>
+                          <TableHead className="text-right" style={{ color: "#555" }}>Precio Unitario</TableHead>
+                          <TableHead className="text-right" style={{ color: "#555" }}>Ahorro</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {product.tiers.map((tier, idx) => {
+                          const savings = ((product.price - tier.price) / product.price) * 100;
+                          return (
+                            <TableRow key={idx} style={{ borderColor: "#1a1a1a" }}>
+                              <TableCell className="font-bold text-white">{tier.label}</TableCell>
+                              <TableCell className="text-right font-black text-lg" style={{ color: NEON }}>${tier.price.toFixed(2)}</TableCell>
+                              <TableCell className="text-right">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold"
+                                  style={{ background: `${NEON}18`, color: NEON, border: `1px solid ${NEON}33` }}>
+                                  -{savings.toFixed(0)}%
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               ))}
               {products?.length === 0 && (

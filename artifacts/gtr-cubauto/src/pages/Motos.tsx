@@ -32,7 +32,7 @@ export default function Motos() {
             </div>
             <span className="font-black tracking-widest uppercase text-sm" style={{ color: NEON }}>Categoría · Motos</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight neon-text" style={{ textShadow: `0 0 40px ${NEON}33` }}>MOTOS</h1>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight neon-text" style={{ textShadow: `0 0 40px ${NEON}33` }}>MOTOS</h1>
           <p className="text-lg mt-2" style={{ color: "#555" }}>Repuestos y accesorios especializados para motocicletas</p>
         </div>
       </div>
@@ -40,13 +40,13 @@ export default function Motos() {
       <div className="min-h-screen py-12" style={{ background: "#050505" }}>
         <div className="container mx-auto px-4">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {[1,2,3,4].map(i => <div key={i} className="h-80 rounded-2xl animate-pulse" style={{ background: "#111" }} />)}
             </div>
           ) : products?.length === 0 ? (
             <div className="text-center py-20 text-lg" style={{ color: "#555" }}>No hay productos de motos disponibles.</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {products?.map(product => (
                 <div key={product.id} data-testid={`card-moto-${product.id}`}
                   className="group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
@@ -54,25 +54,25 @@ export default function Motos() {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = `${NEON}44`; e.currentTarget.style.boxShadow = `0 0 20px ${NEON}11`; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = "#1a1a1a"; e.currentTarget.style.boxShadow = "none"; }}
                 >
-                  <div className="relative h-52 overflow-hidden" style={{ background: "#111" }}>
+                  <div className="relative h-40 sm:h-52 overflow-hidden" style={{ background: "#111" }}>
                     <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/500x400/000/00ff41?text=${encodeURIComponent(product.name.slice(0,10))}`; }} />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%)" }} />
                     {product.stock < 5 && product.stock > 0 && <Badge className="absolute top-3 right-3 bg-red-600 text-white border-0">Pocas unidades</Badge>}
                     {product.stock === 0 && <Badge className="absolute top-3 right-3 border-0" style={{ background: "#222", color: "#666" }}>Agotado</Badge>}
                   </div>
-                  <div className="p-5">
-                    <div className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: "#444" }}>{product.category.replace("Motos - ", "")}</div>
-                    <h3 className="text-white font-bold text-base leading-tight mb-3 line-clamp-2">{product.name}</h3>
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <div className="text-2xl font-black neon-text" style={{ color: NEON }}>${product.price.toFixed(2)}</div>
-                        <div className="text-xs" style={{ color: "#444" }}>Stock: {product.stock}</div>
+                  <div className="p-3 sm:p-5">
+                    <div className="text-[10px] sm:text-xs font-black uppercase tracking-widest mb-1 truncate" style={{ color: "#444" }}>{product.category.replace("Motos - ", "")}</div>
+                    <h3 className="text-white font-bold text-sm sm:text-base leading-tight mb-2 sm:mb-3 line-clamp-2">{product.name}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                      <div className="min-w-0">
+                        <div className="text-lg sm:text-2xl font-black neon-text truncate" style={{ color: NEON }}>${product.price.toFixed(2)}</div>
+                        <div className="text-[10px] sm:text-xs" style={{ color: "#444" }}>Stock: {product.stock}</div>
                       </div>
                       <Button size="sm" disabled={!product.stock} onClick={() => setCheckoutProduct(product)}
-                        className="rounded-full px-4 font-bold text-black border-0 neon-glow"
+                        className="w-full sm:w-auto rounded-full px-3 sm:px-4 font-bold text-black border-0 neon-glow text-xs sm:text-sm"
                         style={{ background: product.stock ? NEON : "#222", color: product.stock ? "#000" : "#555" }}>
-                        <ShoppingCart className="h-4 w-4 mr-1" /> Comprar
+                        <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" /> Comprar
                       </Button>
                     </div>
                     {product.stock > 0 && (
