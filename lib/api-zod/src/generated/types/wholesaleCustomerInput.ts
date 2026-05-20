@@ -13,4 +13,5 @@ export interface WholesaleCustomerInput {
   province: string;
   companyType: string;
   companyName: string;
+  onatDocument: string;
 }

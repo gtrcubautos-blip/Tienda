@@ -10,6 +10,7 @@ export const wholesaleCustomersTable = pgTable("wholesale_customers", {
   province: text("province").notNull(),
   companyType: text("company_type").notNull(), // TCP | MIPYME
   companyName: text("company_name").notNull(),
+  onatDocument: text("onat_document").notNull(),
   clientCode: text("client_code").notNull().unique(),
   clientNumber: integer("client_number").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

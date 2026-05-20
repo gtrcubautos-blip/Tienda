@@ -14,6 +14,7 @@ export interface WholesaleCustomerRecord {
   province: string;
   companyType: string;
   companyName: string;
+  onatDocument: string;
   clientCode: string;
   clientNumber: number;
   createdAt: string;

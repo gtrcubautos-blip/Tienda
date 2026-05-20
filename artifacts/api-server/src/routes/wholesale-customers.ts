@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { name, phone, email, province, companyType, companyName } = parsed.data;
+  const { name, phone, email, province, companyType, companyName, onatDocument } = parsed.data;
 
   // Determine next sequential number
   const [{ value: total }] = await db.select({ value: count() }).from(wholesaleCustomersTable);
@@ -47,6 +47,7 @@ router.post("/", async (req, res) => {
     province,
     companyType,
     companyName,
+    onatDocument,
     clientCode,
     clientNumber,
   }).returning();
@@ -59,6 +60,7 @@ router.post("/", async (req, res) => {
     province: inserted.province,
     companyType: inserted.companyType,
     companyName: inserted.companyName,
+    onatDocument: inserted.onatDocument,
     clientCode: inserted.clientCode,
     clientNumber: inserted.clientNumber,
     createdAt: inserted.createdAt.toISOString(),

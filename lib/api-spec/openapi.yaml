@@ -676,7 +676,7 @@ components:
 
     WholesaleCustomerRecord:
       type: object
-      required: [id, name, phone, email, province, companyType, companyName, clientCode, clientNumber, createdAt]
+      required: [id, name, phone, email, province, companyType, companyName, onatDocument, clientCode, clientNumber, createdAt]
       properties:
         id:
           type: integer
@@ -692,6 +692,8 @@ components:
           type: string
         companyName:
           type: string
+        onatDocument:
+          type: string
         clientCode:
           type: string
         clientNumber:
@@ -701,7 +703,7 @@ components:
 
     WholesaleCustomerInput:
       type: object
-      required: [name, phone, email, province, companyType, companyName]
+      required: [name, phone, email, province, companyType, companyName, onatDocument]
       properties:
         name:
           type: string
@@ -714,6 +716,8 @@ components:
         companyType:
           type: string
         companyName:
+          type: string
+        onatDocument:
           type: string
 
     DashboardSummary:

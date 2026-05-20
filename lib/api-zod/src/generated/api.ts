@@ -290,6 +290,7 @@ export const ListWholesaleCustomersResponseItem = zod.object({
   "province": zod.string(),
   "companyType": zod.string(),
   "companyName": zod.string(),
+  "onatDocument": zod.string(),
   "clientCode": zod.string(),
   "clientNumber": zod.number(),
   "createdAt": zod.string()
@@ -306,7 +307,8 @@ export const RegisterWholesaleCustomerBody = zod.object({
   "email": zod.string(),
   "province": zod.string(),
   "companyType": zod.string(),
-  "companyName": zod.string()
+  "companyName": zod.string(),
+  "onatDocument": zod.string()
 })
 
 

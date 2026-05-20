@@ -32,11 +32,12 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
   const [province, setProvince] = useState("");
   const [companyType, setCompanyType] = useState<"TCP" | "MIPYME" | "">("");
   const [companyName, setCompanyName] = useState("");
+  const [onatDocument, setOnatDocument] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [clientCode, setClientCode] = useState("");
   const [clientNumber, setClientNumber] = useState(0);
 
-  const canSubmit = name.trim() && phone.trim() && email.trim() && province && companyType && companyName.trim();
+  const canSubmit = name.trim() && phone.trim() && email.trim() && province && companyType && companyName.trim() && onatDocument.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +54,7 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
           province,
           companyType,
           companyName: companyName.trim(),
+          onatDocument: onatDocument.trim(),
         }),
       });
       if (res.ok) {
@@ -60,7 +62,7 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
         setClientCode(data.clientCode);
         setClientNumber(data.clientNumber);
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          name, phone, email, province, companyType, companyName,
+          name, phone, email, province, companyType, companyName, onatDocument,
           clientCode: data.clientCode, clientNumber: data.clientNumber, ts: Date.now()
         }));
         setStep("success");
@@ -82,7 +84,7 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
 
   const handleClose = () => {
     if (step === "form") {
-      setName(""); setPhone(""); setEmail(""); setProvince(""); setCompanyType(""); setCompanyName("");
+      setName(""); setPhone(""); setEmail(""); setProvince(""); setCompanyType(""); setCompanyName(""); setOnatDocument("");
     }
     onClose();
   };
@@ -136,6 +138,10 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
                 <div className="col-span-2">
                   <p className="text-xs" style={{ color: "#555" }}>Empresa</p>
                   <p className="font-bold text-white">{companyName}</p>
+                </div>
+                <div className="col-span-2 rounded-lg p-2.5" style={{ background: "#0d1a0d", border: "1px solid #00ff4122" }}>
+                  <p className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: "#00ff4188" }}>Doc. ONAT</p>
+                  <p className="font-mono font-bold text-sm text-white">{onatDocument}</p>
                 </div>
               </div>
             </div>
@@ -212,6 +218,21 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
                   placeholder="Ej: Taller Mecánico San Luis"
                   className="text-white border-0 focus-visible:ring-1 focus-visible:ring-primary"
                   style={{ background: "#111" }} />
+              </div>
+
+              {/* ONAT Document */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>
+                  Documento ONAT <span style={{ color: NEON }}>*</span>
+                </Label>
+                <Input required value={onatDocument} onChange={e => setOnatDocument(e.target.value)}
+                  placeholder="Nº de registro tributario (ONAT)"
+                  className="text-white border-0 focus-visible:ring-1 focus-visible:ring-primary"
+                  style={{ background: "#111" }}
+                />
+                <p className="text-xs leading-relaxed" style={{ color: "#555" }}>
+                  Número de inscripción en la Oficina Nacional de Administración Tributaria. Requerido para acceder a precios mayoristas.
+                </p>
               </div>
 
               {/* Separator */}
