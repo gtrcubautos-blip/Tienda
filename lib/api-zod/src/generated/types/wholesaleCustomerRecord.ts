@@ -15,6 +15,7 @@ export interface WholesaleCustomerRecord {
   companyType: string;
   companyName: string;
   onatDocument: string;
+  onatPhotoPath?: string | null;
   clientCode: string;
   clientNumber: number;
   createdAt: string;

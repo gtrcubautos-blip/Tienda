@@ -291,6 +291,7 @@ export const ListWholesaleCustomersResponseItem = zod.object({
   "companyType": zod.string(),
   "companyName": zod.string(),
   "onatDocument": zod.string(),
+  "onatPhotoPath": zod.string().nullish(),
   "clientCode": zod.string(),
   "clientNumber": zod.number(),
   "createdAt": zod.string()
@@ -308,7 +309,8 @@ export const RegisterWholesaleCustomerBody = zod.object({
   "province": zod.string(),
   "companyType": zod.string(),
   "companyName": zod.string(),
-  "onatDocument": zod.string()
+  "onatDocument": zod.string(),
+  "onatPhotoPath": zod.string().nullish()
 })
 
 
@@ -346,6 +348,34 @@ export const GetDashboardSummaryResponse = zod.object({
   "lowStockCount": zod.number(),
   "activeDiscounts": zod.number(),
   "revenueToday": zod.number()
+})
+
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+
+
+
+
+
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string().min(1),
+  "size": zod.number().min(1),
+  "contentType": zod.string().min(1)
+})
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.string().url(),
+  "objectPath": zod.string()
+})
+
+
+/**
+ * @summary Serve an object entity
+ */
+export const GetStorageObjectParams = zod.object({
+  "objectPath": zod.coerce.string()
 })
 
 

@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CUBA_PROVINCES } from "@/components/WelcomeModal";
-import { Building2, CheckCircle2, Copy, X } from "lucide-react";
+import { Building2, CheckCircle2, Copy, X, Camera, Upload, ImageIcon, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUpload } from "@workspace/object-storage-web";
 
 const NEON = "#00ff41";
 const NEON_DIM = "#00ff4115";
@@ -25,6 +26,8 @@ interface WholesaleRegisterModalProps {
 
 export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModalProps) {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [step, setStep] = useState<"form" | "success">("form");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -33,11 +36,61 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
   const [companyType, setCompanyType] = useState<"TCP" | "MIPYME" | "">("");
   const [companyName, setCompanyName] = useState("");
   const [onatDocument, setOnatDocument] = useState("");
+  const [onatPhotoPath, setOnatPhotoPath] = useState("");
+  const [photoFileName, setPhotoFileName] = useState("");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [clientCode, setClientCode] = useState("");
   const [clientNumber, setClientNumber] = useState(0);
 
-  const canSubmit = name.trim() && phone.trim() && email.trim() && province && companyType && companyName.trim() && onatDocument.trim();
+  const { uploadFile, isUploading, error: uploadError, progress } = useUpload({
+    onSuccess: (res) => {
+      setOnatPhotoPath(res.objectPath);
+    },
+    onError: () => {
+      toast({ title: "Error de subida", description: "No se pudo subir la foto. Intente de nuevo.", variant: "destructive" });
+    },
+  });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"];
+    if (!allowed.includes(file.type)) {
+      toast({ title: "Formato no válido", description: "Use JPG, PNG, WEBP o PDF.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast({ title: "Archivo muy grande", description: "El archivo no puede superar 8 MB.", variant: "destructive" });
+      return;
+    }
+
+    setPhotoFileName(file.name);
+    setOnatPhotoPath("");
+
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoPreview(null);
+    }
+
+    await uploadFile(file);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const canSubmit =
+    name.trim() &&
+    phone.trim() &&
+    email.trim() &&
+    province &&
+    companyType &&
+    companyName.trim() &&
+    onatDocument.trim() &&
+    onatPhotoPath.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +108,7 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
           companyType,
           companyName: companyName.trim(),
           onatDocument: onatDocument.trim(),
+          onatPhotoPath,
         }),
       });
       if (res.ok) {
@@ -62,7 +116,7 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
         setClientCode(data.clientCode);
         setClientNumber(data.clientNumber);
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          name, phone, email, province, companyType, companyName, onatDocument,
+          name, phone, email, province, companyType, companyName, onatDocument, onatPhotoPath,
           clientCode: data.clientCode, clientNumber: data.clientNumber, ts: Date.now()
         }));
         setStep("success");
@@ -84,7 +138,9 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
 
   const handleClose = () => {
     if (step === "form") {
-      setName(""); setPhone(""); setEmail(""); setProvince(""); setCompanyType(""); setCompanyName(""); setOnatDocument("");
+      setName(""); setPhone(""); setEmail(""); setProvince("");
+      setCompanyType(""); setCompanyName(""); setOnatDocument("");
+      setOnatPhotoPath(""); setPhotoFileName(""); setPhotoPreview(null);
     }
     onClose();
   };
@@ -142,6 +198,10 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
                 <div className="col-span-2 rounded-lg p-2.5" style={{ background: "#0d1a0d", border: "1px solid #00ff4122" }}>
                   <p className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: "#00ff4188" }}>Doc. ONAT</p>
                   <p className="font-mono font-bold text-sm text-white">{onatDocument}</p>
+                </div>
+                <div className="col-span-2 flex items-center gap-2 rounded-lg p-2.5" style={{ background: "#0d1a0d", border: "1px solid #00ff4122" }}>
+                  <Camera className="h-4 w-4 shrink-0" style={{ color: NEON }} />
+                  <p className="text-xs font-bold text-white truncate">Foto ONAT subida ✓</p>
                 </div>
               </div>
             </div>
@@ -231,8 +291,101 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
                   style={{ background: "#111" }}
                 />
                 <p className="text-xs leading-relaxed" style={{ color: "#555" }}>
-                  Número de inscripción en la Oficina Nacional de Administración Tributaria. Requerido para acceder a precios mayoristas.
+                  Número de inscripción en la Oficina Nacional de Administración Tributaria.
                 </p>
+              </div>
+
+              {/* ONAT Photo Upload */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>
+                  Foto / Escáner del ONAT <span style={{ color: NEON }}>*</span>
+                </Label>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  disabled={isUploading}
+                />
+
+                {!onatPhotoPath && !isUploading ? (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full rounded-xl border-2 border-dashed p-6 flex flex-col items-center gap-3 transition-all hover:border-opacity-80 group"
+                    style={{ borderColor: "#333", background: "#0a0a0a" }}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = NEON + "66")}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = "#333")}
+                  >
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                      style={{ background: NEON_DIM, border: `1px solid ${NEON_BORDER}` }}>
+                      <Camera className="h-6 w-6" style={{ color: NEON }} />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-bold text-white">Subir foto del ONAT</p>
+                      <p className="text-xs mt-0.5" style={{ color: "#555" }}>JPG, PNG, WEBP o PDF · Máx. 8 MB</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold"
+                      style={{ background: NEON_DIM, border: `1px solid ${NEON_BORDER}`, color: NEON }}>
+                      <Upload className="h-3 w-3" />
+                      Seleccionar archivo
+                    </div>
+                  </button>
+                ) : isUploading ? (
+                  <div className="w-full rounded-xl border p-4 flex flex-col gap-3"
+                    style={{ borderColor: NEON_BORDER, background: "#0a0a0a" }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: NEON_DIM, border: `1px solid ${NEON_BORDER}` }}>
+                        <Loader2 className="h-4 w-4 animate-spin" style={{ color: NEON }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-white truncate">{photoFileName}</p>
+                        <p className="text-xs" style={{ color: "#555" }}>Subiendo...</p>
+                      </div>
+                    </div>
+                    <div className="w-full rounded-full h-1.5 overflow-hidden" style={{ background: "#1a1a1a" }}>
+                      <div className="h-full rounded-full transition-all duration-300"
+                        style={{ width: `${progress}%`, background: NEON }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full rounded-xl border p-4 flex items-center gap-3"
+                    style={{ borderColor: "#00ff4144", background: "#0d1a0d" }}>
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="ONAT preview"
+                        className="w-12 h-12 rounded-lg object-cover shrink-0"
+                        style={{ border: `1px solid ${NEON_BORDER}` }} />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: NEON_DIM, border: `1px solid ${NEON_BORDER}` }}>
+                        <ImageIcon className="h-5 w-5" style={{ color: NEON }} />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: NEON }} />
+                        <p className="text-xs font-bold text-white truncate">{photoFileName}</p>
+                      </div>
+                      <p className="text-xs mt-0.5" style={{ color: "#00ff4177" }}>Documento subido correctamente</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-xs px-2.5 py-1 rounded-lg shrink-0 transition-colors"
+                      style={{ background: "#1a1a1a", color: "#666" }}>
+                      Cambiar
+                    </button>
+                  </div>
+                )}
+
+                {uploadError && (
+                  <p className="text-xs" style={{ color: "#ff4444" }}>
+                    Error al subir: {uploadError.message}
+                  </p>
+                )}
               </div>
 
               {/* Separator */}
@@ -291,7 +444,7 @@ export function WholesaleRegisterModal({ open, onClose }: WholesaleRegisterModal
               </div>
 
               <div className="pt-1 pb-2">
-                <Button type="submit" disabled={!canSubmit || submitting}
+                <Button type="submit" disabled={!canSubmit || submitting || isUploading}
                   className="w-full rounded-full font-black text-black border-0 py-5 transition-all"
                   style={{
                     background: canSubmit ? NEON : "#222",

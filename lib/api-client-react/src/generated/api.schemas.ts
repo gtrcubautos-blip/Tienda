@@ -256,6 +256,7 @@ export interface WholesaleCustomerRecord {
   companyType: string;
   companyName: string;
   onatDocument: string;
+  onatPhotoPath?: string | null;
   clientCode: string;
   clientNumber: number;
   createdAt: string;
@@ -269,6 +270,25 @@ export interface WholesaleCustomerInput {
   companyType: string;
   companyName: string;
   onatDocument: string;
+  onatPhotoPath?: string | null;
+}
+
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+}
+
+export interface ErrorEnvelope {
+  error: string;
 }
 
 export interface DashboardSummary {

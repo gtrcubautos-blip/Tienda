@@ -14,4 +14,5 @@ export interface WholesaleCustomerInput {
   companyType: string;
   companyName: string;
   onatDocument: string;
+  onatPhotoPath?: string | null;
 }
