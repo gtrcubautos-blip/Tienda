@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "p7uHlPocJATz9PUrbrm8P"
+uri = "file://gtr-cubauto-html.zip"
+type = "unspecified"
+title = "GTR CUBAUTO — Archivos HTML (listo para publicar)"
