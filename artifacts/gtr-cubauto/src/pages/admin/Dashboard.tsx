@@ -1,7 +1,7 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useGetDashboardSummary, useListOrders, useListProducts } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ShoppingBag, Package, Percent, Users, TrendingUp, AlertTriangle, BarChart3 } from "lucide-react";
+import { DollarSign, ShoppingBag, Package, Percent, Users, TrendingUp, AlertTriangle, BarChart3, Flame, TrendingDown, Minus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
@@ -93,6 +93,53 @@ export default function Dashboard() {
     .map(([region, { count, revenue }]) => ({ region, count, revenue: Math.round(revenue * 100) / 100 }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10);
+
+  // ── Demand tier classification ──
+  type DemandTier = "alta" | "media" | "baja" | "nula";
+  const soldUnitsMap: Record<number, number> = {};
+  orders?.filter(o => o.status !== "cancelled").forEach(order => {
+    const items = Array.isArray(order.items) ? order.items : [];
+    items.forEach((item: { productId: number; qty: number }) => {
+      soldUnitsMap[item.productId] = (soldUnitsMap[item.productId] ?? 0) + item.qty;
+    });
+  });
+
+  const withSalesD = (products ?? [])
+    .filter(p => soldUnitsMap[p.id] > 0)
+    .map(p => ({ id: p.id, name: p.name, units: soldUnitsMap[p.id], tier: "alta" as DemandTier }))
+    .sort((a, b) => b.units - a.units);
+  const noSalesD = (products ?? [])
+    .filter(p => !soldUnitsMap[p.id] && p.stock > 0)
+    .map(p => ({ id: p.id, name: p.name, units: 0, tier: "nula" as DemandTier }));
+
+  const nd = withSalesD.length;
+  const altaCutD  = Math.ceil(nd * 0.33);
+  const mediaCutD = Math.ceil(nd * 0.66);
+  withSalesD.forEach((p, i) => {
+    p.tier = i < altaCutD ? "alta" : i < mediaCutD ? "media" : "baja";
+  });
+
+  const demandTiers = {
+    alta:  withSalesD.filter(p => p.tier === "alta"),
+    media: withSalesD.filter(p => p.tier === "media"),
+    baja:  withSalesD.filter(p => p.tier === "baja"),
+    nula:  noSalesD,
+  };
+
+  const TCOL_D: Record<DemandTier, string> = { alta: "#00ff41", media: "#fbbf24", baja: "#f97316", nula: "#ef4444" };
+  const TLAB_D: Record<DemandTier, string> = { alta: "Alta Demanda", media: "Demanda Media", baja: "Baja Demanda", nula: "Sin Movimiento" };
+
+  // Side-by-side bar chart: top 6 high + bottom 6 low/nula
+  const demandCompare = [
+    ...demandTiers.alta.slice(0, 6).map(p => ({
+      name: p.name.length > 20 ? p.name.slice(0, 20) + "…" : p.name,
+      units: p.units, tier: "alta",
+    })),
+    ...([...demandTiers.baja, ...demandTiers.nula]).slice(0, 6).map(p => ({
+      name: p.name.length > 20 ? p.name.slice(0, 20) + "…" : p.name,
+      units: p.units, tier: p.tier,
+    })),
+  ];
 
   const metrics = [
     { title: "Ingresos Totales", value: summary ? `$${summary.totalRevenue.toFixed(2)}` : "", icon: DollarSign, color: "text-primary" },
@@ -208,7 +255,152 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Row 4: Region Stats Table */}
+        {/* Row 4: Demand Classification */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-base font-black flex items-center gap-2" style={{ color: NEON }}>
+              <BarChart3 className="h-4 w-4" /> Clasificación de Demanda — Productos
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Clasificación automática basada en unidades vendidas · Solo visible con contraseña de administrador
+            </p>
+          </div>
+
+          {/* Tier KPI cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {([
+              { tier: "alta" as DemandTier, icon: Flame },
+              { tier: "media" as DemandTier, icon: Minus },
+              { tier: "baja" as DemandTier, icon: TrendingDown },
+              { tier: "nula" as DemandTier, icon: AlertTriangle },
+            ]).map(({ tier, icon: Icon }) => (
+              <Card key={tier} className="bg-card border-border">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: TCOL_D[tier] }} />
+                    <span className="text-xs font-bold uppercase tracking-wide" style={{ color: TCOL_D[tier] }}>{TLAB_D[tier]}</span>
+                  </div>
+                  <div className="text-2xl font-black" style={{ color: TCOL_D[tier] }}>{demandTiers[tier].length}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {tier === "nula" ? "stock sin ventas" : tier === "alta" ? "top 33% del catálogo" : tier === "media" ? "demanda moderada" : "revisar precio/visib."}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Comparison chart: top sellers vs low demand */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Top demand */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <Flame className="h-4 w-4" style={{ color: NEON }} />
+                  <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Alta Demanda — Top Productos</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4">
+                {demandTiers.alta.length === 0 ? (
+                  <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">Sin ventas registradas aún.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {demandTiers.alta.slice(0, 8).map((p, i) => {
+                      const maxU = demandTiers.alta[0]?.units ?? 1;
+                      const pct = (p.units / maxU) * 100;
+                      return (
+                        <div key={p.id} className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground w-5 text-right shrink-0">#{i + 1}</span>
+                          <span className="text-xs w-36 truncate shrink-0 text-white">{p.name.length > 22 ? p.name.slice(0, 22) + "…" : p.name}</span>
+                          <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: "#0d0d0d" }}>
+                            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: NEON }} />
+                          </div>
+                          <span className="text-xs font-black shrink-0 w-14 text-right" style={{ color: NEON }}>{p.units} uds.</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Low / no demand */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-red-400" />
+                  <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Baja Demanda / Sin Movimiento</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4">
+                {demandTiers.baja.length === 0 && demandTiers.nula.length === 0 ? (
+                  <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">¡Todos los productos tienen demanda!</div>
+                ) : (
+                  <div className="space-y-2">
+                    {[...demandTiers.baja, ...demandTiers.nula].slice(0, 8).map((p, i) => {
+                      const color = TCOL_D[p.tier];
+                      const label = p.tier === "nula" ? "Sin ventas" : `${p.units} uds.`;
+                      return (
+                        <div key={p.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5"
+                          style={{ background: p.tier === "nula" ? "#ef444408" : "#f9731608", border: `1px solid ${color}22` }}>
+                          <span className="text-xs text-muted-foreground w-5 text-right shrink-0">#{i + 1}</span>
+                          <span className="text-xs flex-1 truncate" style={{ color: "#ccc" }}>{p.name.length > 26 ? p.name.slice(0, 26) + "…" : p.name}</span>
+                          <span className="text-xs font-black shrink-0" style={{ color }}>{label}</span>
+                          <span className="text-xs px-1.5 py-0.5 rounded-full font-bold shrink-0"
+                            style={{ background: `${color}18`, color, border: `1px solid ${color}33` }}>
+                            {p.tier === "nula" ? "Sin Movimiento" : "Baja Demanda"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Full demand bar chart */}
+          {demandCompare.length > 0 && (
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                    Alta Demanda vs Baja Demanda — Comparativa
+                  </CardTitle>
+                </div>
+                <div className="flex flex-wrap gap-3 mt-1">
+                  {(["alta","baja","nula"] as DemandTier[]).map(t => (
+                    <div key={t} className="flex items-center gap-1.5 text-xs">
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: TCOL_D[t] }} />
+                      <span className="text-muted-foreground">{TLAB_D[t]}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ResponsiveContainer width="100%" height={Math.max(demandCompare.length * 38 + 16, 120)}>
+                  <BarChart data={demandCompare} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" horizontal={false} />
+                    <XAxis type="number" tick={{ fill: "#666", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="name" width={150} tick={{ fill: "#888", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <Tooltip
+                      contentStyle={{ background: "#111", border: "1px solid #333", borderRadius: 8, fontSize: 12 }}
+                      labelStyle={{ color: "#fff", fontWeight: 700 }}
+                      formatter={(v: number) => [`${v} uds.`, "Unidades vendidas"]}
+                    />
+                    <Bar dataKey="units" radius={[0, 4, 4, 0]}>
+                      {demandCompare.map((d, i) => (
+                        <Cell key={i} fill={TCOL_D[d.tier as DemandTier]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Row 5: Region Stats Table */}
         {regionData.length > 0 && (
           <Card className="bg-card border-border">
             <CardHeader className="pb-2">

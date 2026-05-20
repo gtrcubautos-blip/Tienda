@@ -820,6 +820,113 @@ export default function Ventas() {
               </Card>
             </div>
 
+            {/* ── Row 5: Tier KPIs + Full ranked demand chart ── */}
+            {(() => {
+              const allProductsFlat = allProducts ?? [];
+              const soldMap: Record<number, number> = {};
+              allProductStats.forEach(p => { soldMap[p.productId] = p.units; });
+
+              type TieredP = { id: number; name: string; units: number; tier: "alta" | "media" | "baja" | "nula" };
+              const withSales: TieredP[] = allProductsFlat
+                .filter(p => soldMap[p.id] > 0)
+                .map(p => ({ id: p.id, name: p.name, units: soldMap[p.id], tier: "alta" as TieredP["tier"] }))
+                .sort((a, b) => b.units - a.units);
+              const noSales: TieredP[] = allProductsFlat
+                .filter(p => !soldMap[p.id] && p.stock > 0)
+                .map(p => ({ id: p.id, name: p.name, units: 0, tier: "nula" as TieredP["tier"] }));
+
+              const n = withSales.length;
+              const altaCut  = Math.ceil(n * 0.33);
+              const mediaCut = Math.ceil(n * 0.66);
+              withSales.forEach((p, i) => {
+                p.tier = i < altaCut ? "alta" : i < mediaCut ? "media" : "baja";
+              });
+
+              const tiers = {
+                alta:  withSales.filter(p => p.tier === "alta"),
+                media: withSales.filter(p => p.tier === "media"),
+                baja:  withSales.filter(p => p.tier === "baja"),
+                nula:  noSales,
+              };
+              const TCOL  = { alta: NEON,      media: "#fbbf24", baja: "#f97316", nula: "#ef4444" } as const;
+              const TBG   = { alta: "#00ff4110", media: "#fbbf2410", baja: "#f9731610", nula: "#ef444410" } as const;
+              const TLAB  = { alta: "Alta Demanda", media: "Demanda Media", baja: "Baja Demanda", nula: "Sin Movimiento" } as const;
+              const maxU  = withSales[0]?.units ?? 1;
+
+              return (
+                <>
+                  {/* Tier KPI row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {(["alta","media","baja","nula"] as const).map(t => (
+                      <Card key={t} className="bg-card border-border">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: TCOL[t] }} />
+                            <span className="text-xs font-bold uppercase tracking-wide" style={{ color: TCOL[t] }}>{TLAB[t]}</span>
+                          </div>
+                          <div className="text-2xl font-black" style={{ color: TCOL[t] }}>{tiers[t].length}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {t === "nula" ? "con stock, cero ventas" : t === "alta" ? "top del catálogo" : t === "media" ? "demanda moderada" : "revisar precio/visibilidad"}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Full ranked demand bar chart */}
+                  <Card className="bg-card border-border">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2">
+                        <BarChart2 className="h-4 w-4 text-primary" />
+                        <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                          Clasificación de Demanda — Todos los Productos
+                        </CardTitle>
+                      </div>
+                      <div className="flex flex-wrap gap-4 mt-1">
+                        {(["alta","media","baja","nula"] as const).map(t => (
+                          <div key={t} className="flex items-center gap-1.5 text-xs">
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: TCOL[t] }} />
+                            <span className="text-muted-foreground">{TLAB[t]} ({tiers[t].length})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0 pb-4">
+                      {allProductsFlat.length === 0 ? (
+                        <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">Sin productos en catálogo.</div>
+                      ) : (
+                        <div className="space-y-1 max-h-[520px] overflow-y-auto pr-1">
+                          {[...withSales, ...noSales].map((p, i) => {
+                            const barPct = maxU > 0 ? (p.units / maxU) * 100 : 0;
+                            return (
+                              <div key={p.id} className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+                                style={{ background: i % 2 === 0 ? "#0a0a0a" : "#080808" }}>
+                                <span className="text-xs text-muted-foreground w-5 text-right shrink-0">#{i + 1}</span>
+                                <span className="text-xs w-44 shrink-0 truncate" style={{ color: p.units > 0 ? "#ccc" : "#444" }}>
+                                  {p.name.length > 26 ? p.name.slice(0, 26) + "…" : p.name}
+                                </span>
+                                <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: "#111" }}>
+                                  <div className="h-full rounded-full"
+                                    style={{ width: `${Math.max(barPct, p.units > 0 ? 1.5 : 0)}%`, background: TCOL[p.tier] }} />
+                                </div>
+                                <span className="text-xs font-black w-14 text-right shrink-0" style={{ color: TCOL[p.tier] }}>
+                                  {p.units > 0 ? `${p.units} uds.` : "—"}
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded-full font-bold w-28 text-center shrink-0"
+                                  style={{ background: TBG[p.tier], color: TCOL[p.tier], border: `1px solid ${TCOL[p.tier]}33` }}>
+                                  {TLAB[p.tier]}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </>
+              );
+            })()}
+
           </div>
         )}
 
