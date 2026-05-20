@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, ChevronDown, ChevronUp, CheckCircle2 } from "lucide-react";
+import { Package, ChevronDown, ChevronUp, CheckCircle2, X } from "lucide-react";
 
 const NEON = "#00ff41";
 const NEON_DIM = "#00ff4115";
 const NEON_BORDER = "#00ff4130";
 const STORAGE_KEY = "gtr_registered";
 
-const CUBA_PROVINCES = [
+export const CUBA_PROVINCES = [
   "Pinar del Río","Artemisa","La Habana","Mayabeque","Matanzas",
   "Villa Clara","Cienfuegos","Sancti Spíritus","Ciego de Ávila",
   "Camagüey","Las Tunas","Holguín","Granma","Santiago de Cuba",
@@ -85,15 +85,17 @@ type LegalSection = "terms" | "privacy" | null;
 interface WelcomeModalProps {
   /** When true: open immediately regardless of localStorage (used by checkout gate) */
   forceOpen?: boolean;
-  /** Called after the user completes registration and dismisses the success screen */
+  /** Called after the user completes registration */
   onComplete?: () => void;
+  /** Called when the user closes the modal WITHOUT completing registration (X button) */
+  onClose?: () => void;
 }
 
 export function isRegistered(): boolean {
   return !!localStorage.getItem(STORAGE_KEY);
 }
 
-export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProps = {}) {
+export function WelcomeModal({ forceOpen = false, onComplete, onClose }: WelcomeModalProps = {}) {
   const [open, setOpen] = useState(forceOpen);
   const [step, setStep] = useState<"form" | "done">("form");
   const [name, setName] = useState("");
@@ -103,6 +105,7 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [expanded, setExpanded] = useState<LegalSection>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Only auto-show (with delay) when not forced — i.e. standalone mode
   useEffect(() => {
@@ -113,8 +116,6 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
       return () => clearTimeout(t);
     }
   }, [forceOpen]);
-
-  const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = name.trim() && phone.trim() && email.trim() && province && acceptTerms && acceptPrivacy;
 
@@ -142,19 +143,26 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
     onComplete?.();
   };
 
+  // X button / closing without registering
+  const handleDismiss = () => {
+    setOpen(false);
+    onClose?.();
+  };
+
   const toggle = (section: LegalSection) =>
     setExpanded(prev => (prev === section ? null : section));
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={o => { if (!o) handleDismiss(); }}>
       <DialogContent
         className="border text-white p-0 overflow-hidden max-w-lg w-full"
         style={{ background: "#080808", borderColor: NEON_BORDER }}
         onPointerDownOutside={e => e.preventDefault()}
-        onEscapeKeyDown={e => e.preventDefault()}
+        onEscapeKeyDown={handleDismiss}
       >
         <DialogTitle className="sr-only">Registro de Cliente — GTR CUBAUTO</DialogTitle>
-        <DialogDescription className="sr-only">Completa tus datos para acceder a la tienda y acepta los términos y la política de privacidad.</DialogDescription>
+        <DialogDescription className="sr-only">Completa tus datos para poder realizar compras.</DialogDescription>
+
         {step === "done" ? (
           /* ── SUCCESS ── */
           <div className="flex flex-col items-center py-12 px-8 gap-5 text-center">
@@ -178,24 +186,35 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
         ) : (
           /* ── FORM ── */
           <>
-            {/* Header */}
-            <div className="px-6 pt-6 pb-4 border-b" style={{ borderColor: NEON_BORDER }}>
-              <div className="flex items-center gap-3 mb-1">
+            {/* Header with X close button */}
+            <div className="px-6 pt-5 pb-4 border-b flex items-start justify-between" style={{ borderColor: NEON_BORDER }}>
+              <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center neon-glow" style={{ background: NEON }}>
-                  <Package className="h-4.5 w-4.5 text-black h-5 w-5" />
+                  <Package className="h-5 w-5 text-black" />
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-white leading-tight">GTR CUBAUTO</h2>
                   <p className="text-xs" style={{ color: NEON }}>Registro de Cliente</p>
                 </div>
               </div>
-              <p className="text-xs mt-3" style={{ color: "#666" }}>
-                Para continuar, completa tus datos. Solo se requieren una vez.
+              <button
+                type="button"
+                onClick={handleDismiss}
+                className="mt-0.5 rounded-full p-1.5 transition-colors hover:bg-white/10"
+                style={{ color: "#555" }}
+                aria-label="Cerrar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="px-6 pt-3 pb-1">
+              <p className="text-xs" style={{ color: "#666" }}>
+                Para realizar compras debes registrarte una sola vez. Puedes cerrar esta ventana, pero no podrás comprar sin registrarte.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
-              {/* Name */}
+            <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4 max-h-[65vh] overflow-y-auto">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>
                   Nombre completo <span style={{ color: NEON }}>*</span>
@@ -206,7 +225,6 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
                   style={{ background: "#111" }} />
               </div>
 
-              {/* Province */}
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>
                   Provincia <span style={{ color: NEON }}>*</span>
@@ -224,7 +242,6 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
                 </Select>
               </div>
 
-              {/* Phone + Email row */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-bold uppercase tracking-wide" style={{ color: "#888" }}>
@@ -246,7 +263,7 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
                 </div>
               </div>
 
-              {/* ── Términos y condiciones ── */}
+              {/* Términos */}
               <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1e1e1e" }}>
                 <button type="button" onClick={() => toggle("terms")}
                   className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-left transition-colors"
@@ -270,7 +287,7 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
                 </div>
               </div>
 
-              {/* ── Política de privacidad ── */}
+              {/* Privacidad */}
               <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1e1e1e" }}>
                 <button type="button" onClick={() => toggle("privacy")}
                   className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-left transition-colors"
@@ -294,9 +311,8 @@ export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProp
                 </div>
               </div>
 
-              {/* Submit */}
               <div className="pt-1 pb-2">
-                <Button type="submit" disabled={!canSubmit}
+                <Button type="submit" disabled={!canSubmit || submitting}
                   className="w-full rounded-full font-black text-black border-0 py-5 transition-all"
                   style={{
                     background: canSubmit ? NEON : "#222",

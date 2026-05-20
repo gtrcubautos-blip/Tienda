@@ -247,6 +247,28 @@ export interface CampaignResult {
   recipients: string[];
 }
 
+export interface WholesaleCustomerRecord {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  province: string;
+  companyType: string;
+  companyName: string;
+  clientCode: string;
+  clientNumber: number;
+  createdAt: string;
+}
+
+export interface WholesaleCustomerInput {
+  name: string;
+  phone: string;
+  email: string;
+  province: string;
+  companyType: string;
+  companyName: string;
+}
+
 export interface DashboardSummary {
   totalRevenue: number;
   totalOrders: number;

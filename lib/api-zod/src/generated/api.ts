@@ -280,6 +280,45 @@ export const DeleteCustomerParams = zod.object({
 
 
 /**
+ * @summary List all wholesale registered customers
+ */
+export const ListWholesaleCustomersResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "province": zod.string(),
+  "companyType": zod.string(),
+  "companyName": zod.string(),
+  "clientCode": zod.string(),
+  "clientNumber": zod.number(),
+  "createdAt": zod.string()
+})
+export const ListWholesaleCustomersResponse = zod.array(ListWholesaleCustomersResponseItem)
+
+
+/**
+ * @summary Register a new wholesale customer
+ */
+export const RegisterWholesaleCustomerBody = zod.object({
+  "name": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "province": zod.string(),
+  "companyType": zod.string(),
+  "companyName": zod.string()
+})
+
+
+/**
+ * @summary Delete a wholesale customer
+ */
+export const DeleteWholesaleCustomerParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Log a campaign send to a customer segment
  */
 export const SendCampaignBody = zod.object({

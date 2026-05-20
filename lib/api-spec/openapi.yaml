@@ -14,6 +14,7 @@ tags:
   - name: orders
   - name: dashboard
   - name: customers
+  - name: wholesale-customers
 
 paths:
   /healthz:
@@ -278,6 +279,53 @@ paths:
       operationId: deleteCustomer
       tags: [customers]
       summary: Delete a customer record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /wholesale-customers:
+    get:
+      operationId: listWholesaleCustomers
+      tags: [wholesale-customers]
+      summary: List all wholesale registered customers
+      responses:
+        "200":
+          description: Wholesale customer list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WholesaleCustomerRecord"
+    post:
+      operationId: registerWholesaleCustomer
+      tags: [wholesale-customers]
+      summary: Register a new wholesale customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WholesaleCustomerInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WholesaleCustomerRecord"
+
+  /wholesale-customers/{id}:
+    delete:
+      operationId: deleteWholesaleCustomer
+      tags: [wholesale-customers]
+      summary: Delete a wholesale customer
       parameters:
         - name: id
           in: path
@@ -625,6 +673,48 @@ components:
           type: array
           items:
             type: string
+
+    WholesaleCustomerRecord:
+      type: object
+      required: [id, name, phone, email, province, companyType, companyName, clientCode, clientNumber, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        province:
+          type: string
+        companyType:
+          type: string
+        companyName:
+          type: string
+        clientCode:
+          type: string
+        clientNumber:
+          type: integer
+        createdAt:
+          type: string
+
+    WholesaleCustomerInput:
+      type: object
+      required: [name, phone, email, province, companyType, companyName]
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        province:
+          type: string
+        companyType:
+          type: string
+        companyName:
+          type: string
 
     DashboardSummary:
       type: object

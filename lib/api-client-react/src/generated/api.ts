@@ -35,6 +35,8 @@ import type {
   Product,
   ProductInput,
   ProductUpdate,
+  WholesaleCustomerInput,
+  WholesaleCustomerRecord,
   WholesaleProduct
 } from './api.schemas';
 
@@ -1220,6 +1222,224 @@ export const useDeleteCustomer = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteCustomerMutationOptions(options));
+    }
+
+export const getListWholesaleCustomersUrl = () => {
+
+
+
+
+  return `/api/wholesale-customers`
+}
+
+/**
+ * @summary List all wholesale registered customers
+ */
+export const listWholesaleCustomers = async ( options?: RequestInit): Promise<WholesaleCustomerRecord[]> => {
+
+  return customFetch<WholesaleCustomerRecord[]>(getListWholesaleCustomersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListWholesaleCustomersQueryKey = () => {
+    return [
+    `/api/wholesale-customers`
+    ] as const;
+    }
+
+
+export const getListWholesaleCustomersQueryOptions = <TData = Awaited<ReturnType<typeof listWholesaleCustomers>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWholesaleCustomers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListWholesaleCustomersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWholesaleCustomers>>> = ({ signal }) => listWholesaleCustomers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listWholesaleCustomers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListWholesaleCustomersQueryResult = NonNullable<Awaited<ReturnType<typeof listWholesaleCustomers>>>
+export type ListWholesaleCustomersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all wholesale registered customers
+ */
+
+export function useListWholesaleCustomers<TData = Awaited<ReturnType<typeof listWholesaleCustomers>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWholesaleCustomers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListWholesaleCustomersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getRegisterWholesaleCustomerUrl = () => {
+
+
+
+
+  return `/api/wholesale-customers`
+}
+
+/**
+ * @summary Register a new wholesale customer
+ */
+export const registerWholesaleCustomer = async (wholesaleCustomerInput: WholesaleCustomerInput, options?: RequestInit): Promise<WholesaleCustomerRecord> => {
+
+  return customFetch<WholesaleCustomerRecord>(getRegisterWholesaleCustomerUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      wholesaleCustomerInput,)
+  }
+);}
+
+
+
+
+export const getRegisterWholesaleCustomerMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerWholesaleCustomer>>, TError,{data: BodyType<WholesaleCustomerInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerWholesaleCustomer>>, TError,{data: BodyType<WholesaleCustomerInput>}, TContext> => {
+
+const mutationKey = ['registerWholesaleCustomer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerWholesaleCustomer>>, {data: BodyType<WholesaleCustomerInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  registerWholesaleCustomer(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterWholesaleCustomerMutationResult = NonNullable<Awaited<ReturnType<typeof registerWholesaleCustomer>>>
+    export type RegisterWholesaleCustomerMutationBody = BodyType<WholesaleCustomerInput>
+    export type RegisterWholesaleCustomerMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Register a new wholesale customer
+ */
+export const useRegisterWholesaleCustomer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerWholesaleCustomer>>, TError,{data: BodyType<WholesaleCustomerInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof registerWholesaleCustomer>>,
+        TError,
+        {data: BodyType<WholesaleCustomerInput>},
+        TContext
+      > => {
+      return useMutation(getRegisterWholesaleCustomerMutationOptions(options));
+    }
+
+export const getDeleteWholesaleCustomerUrl = (id: number,) => {
+
+
+
+
+  return `/api/wholesale-customers/${id}`
+}
+
+/**
+ * @summary Delete a wholesale customer
+ */
+export const deleteWholesaleCustomer = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteWholesaleCustomerUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteWholesaleCustomerMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWholesaleCustomer>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWholesaleCustomer>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteWholesaleCustomer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWholesaleCustomer>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteWholesaleCustomer(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteWholesaleCustomerMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWholesaleCustomer>>>
+
+    export type DeleteWholesaleCustomerMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a wholesale customer
+ */
+export const useDeleteWholesaleCustomer = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWholesaleCustomer>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteWholesaleCustomer>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteWholesaleCustomerMutationOptions(options));
     }
 
 export const getSendCampaignUrl = () => {

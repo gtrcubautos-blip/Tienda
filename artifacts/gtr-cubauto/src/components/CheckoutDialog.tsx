@@ -105,6 +105,7 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
       <WelcomeModal
         forceOpen={true}
         onComplete={handleRegistrationComplete}
+        onClose={handleClose}
       />
     );
   }

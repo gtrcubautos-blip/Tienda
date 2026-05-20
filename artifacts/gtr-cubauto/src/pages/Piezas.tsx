@@ -2,11 +2,12 @@ import { useState } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { useListProducts } from "@workspace/api-client-react";
-import { ShoppingCart, Wrench, Search } from "lucide-react";
+import { ShoppingCart, Wrench, Search, Plus, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CheckoutDialog } from "@/components/CheckoutDialog";
 import { useSiteConfig } from "@/hooks/use-site-config";
+import { useCart } from "@/contexts/CartContext";
 
 const NEON = "#00ff41";
 
@@ -15,6 +16,7 @@ export default function Piezas() {
   const config = useSiteConfig();
   const [checkoutProduct, setCheckoutProduct] = useState<{ id: number; name: string; price: number; stock: number } | null>(null);
   const [search, setSearch] = useState("");
+  const { addItem, isInCart } = useCart();
 
   const products = allProducts?.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -100,7 +102,7 @@ export default function Piezas() {
                   <div className="p-4 flex flex-col flex-1">
                     <div className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: "#444" }}>{product.category}</div>
                     <h3 className="text-white font-bold text-sm leading-snug mb-3 line-clamp-2 flex-1">{product.name}</h3>
-                    <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center justify-between mt-auto mb-2">
                       <div>
                         <div className="text-xl font-black neon-text" style={{ color: NEON }}>${product.price.toFixed(2)}</div>
                         <div className="text-xs" style={{ color: "#444" }}>Stock: {product.stock}</div>
@@ -111,6 +113,20 @@ export default function Piezas() {
                         <ShoppingCart className="h-3 w-3 mr-1" /> Comprar
                       </Button>
                     </div>
+                    {product.stock > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => addItem({ id: product.id, name: product.name, price: product.price, stock: product.stock, image: product.image, category: product.category })}
+                        className="w-full flex items-center justify-center gap-1 py-1.5 rounded-xl border text-xs font-bold transition-all"
+                        style={{
+                          borderColor: isInCart(product.id) ? `${NEON}66` : "#222",
+                          background: isInCart(product.id) ? `${NEON}10` : "transparent",
+                          color: isInCart(product.id) ? NEON : "#555",
+                        }}
+                      >
+                        {isInCart(product.id) ? <><Check className="h-3 w-3" /> En el carrito</> : <><Plus className="h-3 w-3" /> Agregar al carrito</>}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

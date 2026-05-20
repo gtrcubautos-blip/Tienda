@@ -1,7 +1,9 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Package, LogIn, Menu, X, Bike, Car, Wrench, Users } from "lucide-react";
+import { Package, LogIn, Menu, X, Bike, Car, Wrench, Users, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
+import { CartDrawer } from "@/components/CartDrawer";
 
 const NEON = "#00ff41";
 const NEON_BORDER = "#00ff4128";
@@ -16,6 +18,7 @@ const NAV_ITEMS = [
 export function PublicLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { totalItems, setCartOpen } = useCart();
 
   return (
     <div className="min-h-[100dvh] flex flex-col" style={{ background: "#000", color: "#fff" }}>
@@ -54,6 +57,23 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Cart icon */}
+            <button
+              type="button"
+              onClick={() => setCartOpen(true)}
+              data-testid="btn-cart"
+              className="relative flex items-center justify-center w-9 h-9 rounded-full border transition-all"
+              style={{ borderColor: totalItems > 0 ? NEON : NEON_BORDER, background: totalItems > 0 ? `${NEON}15` : "transparent", color: totalItems > 0 ? NEON : "rgba(255,255,255,0.5)" }}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black text-black"
+                  style={{ background: NEON }}>
+                  {totalItems > 9 ? "9+" : totalItems}
+                </span>
+              )}
+            </button>
+
             <Button variant="outline" size="sm" asChild className="hidden md:flex font-semibold"
               style={{ borderColor: NEON_BORDER, color: "rgba(255,255,255,0.6)", background: "transparent" }}>
               <Link href="/admin" data-testid="link-admin">
@@ -107,6 +127,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
+
+      {/* Global cart drawer */}
+      <CartDrawer />
     </div>
   );
 }

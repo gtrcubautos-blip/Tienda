@@ -32,4 +32,6 @@ export * from './priceUpdate';
 export * from './product';
 export * from './productInput';
 export * from './productUpdate';
+export * from './wholesaleCustomerInput';
+export * from './wholesaleCustomerRecord';
 export * from './wholesaleProduct';
