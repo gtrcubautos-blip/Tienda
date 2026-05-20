@@ -115,6 +115,7 @@ export function WelcomeModal({ forceOpen = false, onComplete, onClose }: Welcome
       const t = setTimeout(() => setOpen(true), 800);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [forceOpen]);
 
   const canSubmit = name.trim() && phone.trim() && email.trim() && province && acceptTerms && acceptPrivacy;

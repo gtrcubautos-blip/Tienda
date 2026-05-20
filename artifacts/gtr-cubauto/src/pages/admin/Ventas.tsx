@@ -10,7 +10,14 @@ import { Button } from "@/components/ui/button";
 import {
   FileSpreadsheet, RefreshCw, TrendingUp, ShoppingCart,
   CheckCircle2, Clock, MapPin, Package, List, ArrowUpDown,
+  BarChart2, TrendingDown, AlertTriangle,
 } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  Area, AreaChart, PieChart, Pie, Cell,
+  ResponsiveContainer, Legend,
+} from "recharts";
+import { useListProducts } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
@@ -72,11 +79,13 @@ const TABS = [
   { id: "ordenes",   label: "Órdenes",       icon: List },
   { id: "productos", label: "Por Producto",   icon: Package },
   { id: "regiones",  label: "Por Región",     icon: MapPin },
+  { id: "metricas",  label: "Métricas",       icon: BarChart2 },
 ] as const;
 type TabId = typeof TABS[number]["id"];
 
 export default function Ventas() {
   const { data: orders, isLoading } = useListOrders();
+  const { data: allProducts } = useListProducts();
   const [activeTab, setActiveTab]   = useState<TabId>("ordenes");
   const [typeFilter, setTypeFilter]     = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -120,6 +129,53 @@ export default function Ventas() {
     });
   });
   const productStats: ProductStat[] = Object.values(productMap).sort((a, b) => b[productSort] - a[productSort]);
+
+  /* ── Metrics: stats from ALL orders (no filters) for demand/stuck analysis ── */
+  const allProductMap: Record<number, ProductStat> = {};
+  (orders ?? []).filter(o => o.status !== "cancelled").forEach(order => {
+    const items = Array.isArray(order.items) ? order.items : [];
+    items.forEach((item: { productId: number; productName: string; qty: number; unitPrice: number }) => {
+      if (!allProductMap[item.productId]) {
+        allProductMap[item.productId] = { productId: item.productId, productName: item.productName, units: 0, orders: 0, revenue: 0 };
+      }
+      allProductMap[item.productId].units   += item.qty;
+      allProductMap[item.productId].orders  += 1;
+      allProductMap[item.productId].revenue += item.qty * item.unitPrice;
+    });
+  });
+  const allProductStats: ProductStat[] = Object.values(allProductMap);
+  const soldProductIds = new Set(allProductStats.map(p => p.productId));
+
+  // Top 8 most sold by units
+  const topSellers = [...allProductStats].sort((a, b) => b.units - a.units).slice(0, 8)
+    .map(p => ({ name: p.productName.length > 22 ? p.productName.slice(0, 22) + "…" : p.productName, units: p.units, revenue: Math.round(p.revenue * 100) / 100 }));
+
+  // Bottom 6 least sold (only products with at least 1 sale)
+  const bottomSellers = [...allProductStats].sort((a, b) => a.units - b.units).slice(0, 6)
+    .map(p => ({ name: p.productName.length > 22 ? p.productName.slice(0, 22) + "…" : p.productName, units: p.units, revenue: Math.round(p.revenue * 100) / 100 }));
+
+  // Products with stock but zero sales (stuck in stock)
+  const stuckProducts = (allProducts ?? []).filter(p => p.stock > 0 && !soldProductIds.has(p.id));
+
+  // Revenue distribution for top 5 pie chart
+  const top5Revenue = [...allProductStats].sort((a, b) => b.revenue - a.revenue).slice(0, 5).map((p, i) => ({
+    name: p.productName.length > 18 ? p.productName.slice(0, 18) + "…" : p.productName,
+    value: Math.round(p.revenue * 100) / 100,
+    fill: CHART_COLORS[i],
+  }));
+  const otherRevenue = allProductStats.slice(5).reduce((s, p) => s + p.revenue, 0);
+  if (otherRevenue > 0) top5Revenue.push({ name: "Otros", value: Math.round(otherRevenue * 100) / 100, fill: "#555" });
+
+  // Demand trend: orders grouped by day (last 20 days with activity)
+  const demandMap: Record<string, { revenue: number; orders: number }> = {};
+  (orders ?? []).filter(o => o.status !== "cancelled").forEach(o => {
+    const date = format(new Date(o.createdAt), "dd/MM");
+    if (!demandMap[date]) demandMap[date] = { revenue: 0, orders: 0 };
+    demandMap[date].revenue += o.total;
+    demandMap[date].orders  += 1;
+  });
+  const demandData = Object.entries(demandMap)
+    .map(([date, d]) => ({ date, revenue: Math.round(d.revenue * 100) / 100, orders: d.orders }));
 
   /* ── Region stats ── */
   const regionMap: Record<string, { count: number; total: number }> = {};
@@ -513,6 +569,258 @@ export default function Ventas() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* ══════ TAB: MÉTRICAS ══════ */}
+        {activeTab === "metricas" && (
+          <div className="flex flex-col gap-6">
+
+            {/* ── KPI summary row ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                {
+                  icon: TrendingUp, label: "Producto Estrella",
+                  value: allProductStats.length > 0
+                    ? [...allProductStats].sort((a, b) => b.units - a.units)[0]?.productName.split(" ").slice(0, 3).join(" ")
+                    : "—",
+                  color: "text-primary", sub: "más unidades vendidas",
+                },
+                {
+                  icon: TrendingDown, label: "Menor Demanda",
+                  value: allProductStats.length > 0
+                    ? [...allProductStats].sort((a, b) => a.units - b.units)[0]?.productName.split(" ").slice(0, 3).join(" ")
+                    : "—",
+                  color: "text-amber-400", sub: "menos unidades vendidas",
+                },
+                {
+                  icon: AlertTriangle, label: "Sin Ventas (Stock)",
+                  value: stuckProducts.length,
+                  color: stuckProducts.length > 0 ? "text-red-400" : "text-primary",
+                  sub: "productos estancados",
+                },
+                {
+                  icon: Package, label: "Productos Activos",
+                  value: allProductStats.length,
+                  color: "text-foreground", sub: "con al menos 1 venta",
+                },
+              ].map(({ icon: Icon, label, value, color, sub }) => (
+                <Card key={label} className="bg-card border-border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Icon className={`h-3.5 w-3.5 ${color}`} />
+                      <div className="text-xs text-muted-foreground">{label}</div>
+                    </div>
+                    <div className={`text-xl font-black leading-tight ${color}`}>{value}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* ── Row 2: Top Sellers bar + Pie chart ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+
+              {/* Top 8 más vendidos — horizontal bar */}
+              <Card className="bg-card border-border lg:col-span-3">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                      Top Más Vendidos — Unidades
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0 pb-4">
+                  {topSellers.length === 0 ? (
+                    <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">Sin datos de ventas aún.</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={topSellers.length * 44 + 20}>
+                      <BarChart data={topSellers} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1f1f1f" horizontal={false} />
+                        <XAxis type="number" tick={{ fill: "#666", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis type="category" dataKey="name" width={150} tick={{ fill: "#aaa", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <Tooltip
+                          contentStyle={{ background: "#111", border: "1px solid #333", borderRadius: 8, fontSize: 12 }}
+                          labelStyle={{ color: "#fff", fontWeight: 700 }}
+                          itemStyle={{ color: NEON }}
+                          formatter={(v: number) => [`${v} uds.`, "Unidades"]}
+                        />
+                        <Bar dataKey="units" radius={[0, 4, 4, 0]}>
+                          {topSellers.map((_, i) => (
+                            <Cell key={i} fill={i === 0 ? NEON : i === 1 ? "#00cc33" : i === 2 ? "#009922" : "#1a4a1a"} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Revenue distribution pie */}
+              <Card className="bg-card border-border lg:col-span-2">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <BarChart2 className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                      Distribución de Ingresos
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {top5Revenue.length === 0 ? (
+                    <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">Sin datos.</div>
+                  ) : (
+                    <div>
+                      <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                          <Pie data={top5Revenue} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+                            {top5Revenue.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{ background: "#111", border: "1px solid #333", borderRadius: 8, fontSize: 12 }}
+                            formatter={(v: number) => [`$${v.toFixed(2)}`, "Ingresos"]}
+                            labelStyle={{ color: "#fff" }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="flex flex-col gap-1.5 mt-1">
+                        {top5Revenue.map((entry, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: entry.fill }} />
+                            <span className="text-muted-foreground flex-1 truncate">{entry.name}</span>
+                            <span className="font-bold" style={{ color: entry.fill }}>${entry.value.toFixed(0)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* ── Row 3: Demand trend area chart ── */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                    Tendencia de Demanda — Ingresos por Día
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4">
+                {demandData.length === 0 ? (
+                  <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">Sin datos de demanda aún.</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <AreaChart data={demandData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="demandGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor={NEON} stopOpacity={0.25} />
+                          <stop offset="95%" stopColor={NEON} stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="ordersGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+                      <XAxis dataKey="date" tick={{ fill: "#555", fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <YAxis yAxisId="rev" orientation="left" tick={{ fill: "#555", fontSize: 11 }} axisLine={false} tickLine={false}
+                        tickFormatter={(v: number) => `$${v}`} />
+                      <YAxis yAxisId="ord" orientation="right" tick={{ fill: "#555", fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{ background: "#111", border: "1px solid #333", borderRadius: 8, fontSize: 12 }}
+                        labelStyle={{ color: "#aaa" }}
+                        formatter={(v: number, name: string) => name === "revenue" ? [`$${v.toFixed(2)}`, "Ingresos"] : [v, "Órdenes"]}
+                      />
+                      <Legend formatter={(v: string) => v === "revenue" ? "Ingresos ($)" : "Órdenes"} wrapperStyle={{ fontSize: 11, color: "#666" }} />
+                      <Area yAxisId="rev" type="monotone" dataKey="revenue" stroke={NEON} strokeWidth={2} fill="url(#demandGrad)" dot={false} />
+                      <Area yAxisId="ord" type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={1.5} fill="url(#ordersGrad)" dot={false} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ── Row 4: Two columns — least sold + stuck in stock ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+              {/* Least sold */}
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="h-4 w-4 text-amber-400" />
+                    <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                      Menor Demanda
+                    </CardTitle>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Productos con pocas ventas — revisar precio o visibilidad</p>
+                </CardHeader>
+                <CardContent className="pt-0 pb-4">
+                  {bottomSellers.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground text-sm">Sin datos.</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {bottomSellers.map((p, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/15">
+                          <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-amber-500/10 border border-amber-500/20">
+                            <TrendingDown className="h-3.5 w-3.5 text-amber-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold truncate">{p.name}</div>
+                            <div className="text-xs text-muted-foreground">${p.revenue.toFixed(2)} ingresos</div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-sm font-black text-amber-400">{p.units} uds.</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Stuck in stock */}
+              <Card className="bg-card border-border">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-red-400" />
+                    <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                      Estancados en Stock
+                    </CardTitle>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Tienen inventario pero <strong className="text-red-400">cero ventas</strong> registradas</p>
+                </CardHeader>
+                <CardContent className="pt-0 pb-4">
+                  {stuckProducts.length === 0 ? (
+                    <div className="text-center py-6 text-primary text-sm font-semibold">
+                      ¡Todos los productos con stock han tenido al menos una venta!
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {stuckProducts.map((p) => (
+                        <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-red-500/5 border border-red-500/15">
+                          <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-red-500/10 border border-red-500/20">
+                            <AlertTriangle className="h-3.5 w-3.5 text-red-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold truncate">{p.name}</div>
+                            <div className="text-xs text-muted-foreground capitalize">{p.category} · ${parseFloat(String(p.price)).toFixed(2)}</div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-sm font-black text-red-400">{p.stock} uds.</div>
+                            <div className="text-xs text-muted-foreground">en stock</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+          </div>
         )}
 
       </div>
