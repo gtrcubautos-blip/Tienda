@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCreateOrder, getListProductsQueryKey } from "@workspace/api-client-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CreditCard, Smartphone, Truck, CheckCircle2, MapPin } from "lucide-react";
 import { getSiteConfig } from "@/hooks/use-site-config";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { WelcomeModal, isRegistered } from "@/components/WelcomeModal";
 
 const NEON = "#00ff41";
 const NEON_DIM = "#00ff4115";
@@ -37,10 +38,21 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
   const queryClient = useQueryClient();
   const cfg = getSiteConfig();
   const [step, setStep] = useState<"form" | "success">("form");
-  const [clientName, setClientName] = useState("");
-  const [province, setProvince] = useState("");
+  const [needsRegistration, setNeedsRegistration] = useState(false);
+
+  // Pre-fill name from registration data if available
+  const savedData = (() => { try { return JSON.parse(localStorage.getItem("gtr_registered") ?? "{}"); } catch { return {}; } })();
+  const [clientName, setClientName] = useState(savedData.name ?? "");
+  const [province, setProvince] = useState(savedData.province ?? "");
   const [qty, setQty] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
+
+  // When product is set (dialog opens), gate on registration
+  useEffect(() => {
+    if (product && !isRegistered()) {
+      setNeedsRegistration(true);
+    }
+  }, [product]);
   const [zelleRef, setZelleRef] = useState("");
   const [cardNum, setCardNum] = useState("");
   const [cardName, setCardName] = useState("");
@@ -51,9 +63,20 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
   const total = (product?.price ?? 0) * qty;
 
   const handleClose = () => {
-    setStep("form"); setClientName(""); setProvince(""); setQty(1); setPaymentMethod("cod");
+    setStep("form"); setQty(1); setPaymentMethod("cod");
     setZelleRef(""); setCardNum(""); setCardName(""); setCardExpiry(""); setCardCvv(""); setAddress("");
+    setNeedsRegistration(false);
     onClose();
+  };
+
+  const handleRegistrationComplete = () => {
+    // Re-read saved data to pre-fill checkout fields
+    try {
+      const d = JSON.parse(localStorage.getItem("gtr_registered") ?? "{}");
+      if (d.name) setClientName(d.name);
+      if (d.province) setProvince(d.province);
+    } catch { /* ignore */ }
+    setNeedsRegistration(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -75,6 +98,16 @@ export function CheckoutDialog({ product, onClose }: CheckoutDialogProps) {
       }
     );
   };
+
+  // Registration gate: show WelcomeModal before checkout for unregistered users
+  if (needsRegistration) {
+    return (
+      <WelcomeModal
+        forceOpen={true}
+        onComplete={handleRegistrationComplete}
+      />
+    );
+  }
 
   return (
     <Dialog open={!!product} onOpenChange={open => !open && handleClose()}>

@@ -82,8 +82,19 @@ Nos reservamos el derecho de actualizar esta Política de Privacidad. Le notific
 
 type LegalSection = "terms" | "privacy" | null;
 
-export function WelcomeModal() {
-  const [open, setOpen] = useState(false);
+interface WelcomeModalProps {
+  /** When true: open immediately regardless of localStorage (used by checkout gate) */
+  forceOpen?: boolean;
+  /** Called after the user completes registration and dismisses the success screen */
+  onComplete?: () => void;
+}
+
+export function isRegistered(): boolean {
+  return !!localStorage.getItem(STORAGE_KEY);
+}
+
+export function WelcomeModal({ forceOpen = false, onComplete }: WelcomeModalProps = {}) {
+  const [open, setOpen] = useState(forceOpen);
   const [step, setStep] = useState<"form" | "done">("form");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -93,13 +104,15 @@ export function WelcomeModal() {
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [expanded, setExpanded] = useState<LegalSection>(null);
 
+  // Only auto-show (with delay) when not forced — i.e. standalone mode
   useEffect(() => {
+    if (forceOpen) { setOpen(true); return; }
     const registered = localStorage.getItem(STORAGE_KEY);
     if (!registered) {
       const t = setTimeout(() => setOpen(true), 800);
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [forceOpen]);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -124,7 +137,10 @@ export function WelcomeModal() {
     setStep("done");
   };
 
-  const handleDone = () => setOpen(false);
+  const handleDone = () => {
+    setOpen(false);
+    onComplete?.();
+  };
 
   const toggle = (section: LegalSection) =>
     setExpanded(prev => (prev === section ? null : section));

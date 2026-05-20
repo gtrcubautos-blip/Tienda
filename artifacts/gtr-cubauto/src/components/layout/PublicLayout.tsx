@@ -2,7 +2,6 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Package, LogIn, Menu, X, Bike, Car, Wrench, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WelcomeModal } from "@/components/WelcomeModal";
 
 const NEON = "#00ff41";
 const NEON_BORDER = "#00ff4128";
@@ -20,7 +19,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-[100dvh] flex flex-col" style={{ background: "#000", color: "#fff" }}>
-      <WelcomeModal />
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 w-full" style={{ background: "rgba(0,0,0,0.95)", borderBottom: `1px solid ${NEON_BORDER}`, backdropFilter: "blur(12px)" }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
