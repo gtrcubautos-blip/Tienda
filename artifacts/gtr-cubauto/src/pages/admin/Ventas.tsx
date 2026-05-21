@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { FinanceGate } from "@/components/FinanceGate";
 import { useListOrders, getListOrdersQueryKey } from "@workspace/api-client-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -227,6 +228,7 @@ export default function Ventas() {
   /* ──────────────────────────────────────────── */
   return (
     <AdminLayout>
+      <FinanceGate>
       <div className="flex flex-col gap-6">
 
         {/* Header */}
@@ -931,6 +933,7 @@ export default function Ventas() {
         )}
 
       </div>
+      </FinanceGate>
     </AdminLayout>
   );
 }

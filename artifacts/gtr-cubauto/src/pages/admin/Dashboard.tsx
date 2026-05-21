@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { FinanceGate } from "@/components/FinanceGate";
 import { useGetDashboardSummary, useListOrders, useListProducts } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShoppingBag, Package, Percent, Users, TrendingUp, AlertTriangle, BarChart3, Flame, TrendingDown, Minus } from "lucide-react";
@@ -154,6 +155,7 @@ export default function Dashboard() {
 
   return (
     <AdminLayout>
+      <FinanceGate>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-black tracking-tight">Dashboard</h1>
@@ -449,6 +451,7 @@ export default function Dashboard() {
           </Card>
         )}
       </div>
+      </FinanceGate>
     </AdminLayout>
   );
 }
