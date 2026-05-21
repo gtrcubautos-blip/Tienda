@@ -158,3 +158,9 @@ overrides:
   # drizzle-kit uses esbuild internally on an older version that's vulnerable, this overrides it
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.27.3"
+  # @esbuild-kit/core-utils pins esbuild ~0.18.20 (GHSA-67mh-4wv8-2f99); force it to the safe version
+  "@esbuild-kit/core-utils>esbuild": "0.27.3"
+  # teeny-request pulls in http-proxy-agent@5 → @tootallnate/once@2 (GHSA-vpq2-c234-7xj6);
+  # force both proxy agents to v7 which has no @tootallnate/once dependency
+  http-proxy-agent: "^7.0.0"
+  https-proxy-agent: "^7.0.1"

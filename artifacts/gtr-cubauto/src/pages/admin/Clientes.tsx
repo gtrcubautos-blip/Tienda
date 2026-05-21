@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import {
   Users, Search, Trash2, Send, MapPin, Phone, Mail, X, ChevronDown, ChevronUp,
   Building2, FileSpreadsheet, ExternalLink, Camera,
@@ -107,7 +107,7 @@ export default function Clientes() {
     });
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const rows = filteredWholesale.map((c: WholesaleCustomerRecord) => ({
       "Código Cliente": c.clientCode,
       "Nº Cliente": c.clientNumber,
@@ -124,19 +124,34 @@ export default function Clientes() {
       }),
     }));
 
-    const ws = XLSX.utils.json_to_sheet(rows);
+    const colWidths = [16, 10, 8, 28, 24, 18, 16, 28, 18, 10, 14];
 
-    const colWidths = [
-      { wch: 16 }, { wch: 10 }, { wch: 8 }, { wch: 28 }, { wch: 24 },
-      { wch: 18 }, { wch: 16 }, { wch: 28 }, { wch: 18 }, { wch: 10 }, { wch: 14 },
-    ];
-    ws["!cols"] = colWidths;
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("Clientes Mayoristas");
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Clientes Mayoristas");
+    if (rows.length > 0) {
+      const headers = Object.keys(rows[0]) as (keyof (typeof rows)[0])[];
+      ws.columns = headers.map((key, i) => ({
+        header: String(key),
+        key: String(key),
+        width: colWidths[i] ?? 12,
+      }));
+      rows.forEach(row => ws.addRow(row));
+    }
 
-    const date = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, `GTR_Mayoristas_${date}.xlsx`);
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `GTR_Mayoristas_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
     toast({ title: "Excel exportado", description: `${rows.length} clientes exportados.` });
   };
 
