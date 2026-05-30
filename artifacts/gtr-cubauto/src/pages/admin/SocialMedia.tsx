@@ -7,7 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Share2, Instagram, Facebook, MessageCircle, Copy, Sparkles, CheckCheck, Clock, Zap } from "lucide-react";
+import { Share2, Instagram, Facebook, MessageCircle, Copy, Sparkles, CheckCheck, Clock, Zap, ExternalLink } from "lucide-react";
+
+function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} style={style} aria-hidden="true">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.3 0 .59.04.87.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
+    </svg>
+  );
+}
 
 const TEMPLATES = [
   { id: "promo", label: "Promoción", emoji: "🔥", text: (name: string, price: string) => `🔥 *¡OFERTA ESPECIAL!* 🔥\n\n✅ ${name}\n💵 Precio: $${price} USD\n\n📦 Stock limitado — ¡Aprovecha ahora!\n🚚 Envío a toda Cuba en 24-48h\n\n📲 Escríbenos para más info\n☎️ GTR CUBAUTO — Tu repuesto seguro` },
@@ -21,6 +29,7 @@ const MOCK_HISTORY: PostHistory[] = [
   { id: 1, platform: "WhatsApp", text: "🔥 ¡OFERTA! Aceite Motor 5W-30...", product: "Aceite Motor Sintético", date: "2026-05-18 10:30", status: "sent" },
   { id: 2, platform: "Instagram", text: "🆕 NUEVO: Kit de Embrague...", product: "Kit de Embrague", date: "2026-05-17 15:00", status: "sent" },
   { id: 3, platform: "Facebook", text: "💥 ¡ÚLTIMAS UNIDADES! Bujías...", product: "Bujías de Iridio", date: "2026-05-20 09:00", status: "scheduled" },
+  { id: 4, platform: "TikTok", text: "🔥 Mira este repuesto en acción...", product: "Kit de Frenos", date: "2026-05-22 18:00", status: "sent" },
 ];
 
 export default function SocialMedia() {
@@ -29,7 +38,7 @@ export default function SocialMedia() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState("promo");
   const [customText, setCustomText] = useState("");
-  const [activeTab, setActiveTab] = useState<"whatsapp" | "facebook" | "instagram">("whatsapp");
+  const [activeTab, setActiveTab] = useState<"whatsapp" | "facebook" | "instagram" | "tiktok">("whatsapp");
   const [copied, setCopied] = useState(false);
   const [discount, setDiscount] = useState("");
 
@@ -49,6 +58,12 @@ export default function SocialMedia() {
     whatsapp: "#25d366",
     facebook: "#1877f2",
     instagram: "#e1306c",
+    tiktok: "#fe2c55",
+  };
+
+  const handleTikTokUpload = () => {
+    window.open("https://www.tiktok.com/tiktokstudio/upload", "_blank");
+    toast({ title: "Abriendo TikTok Studio", description: "Sube tu video o foto y pega el texto copiado." });
   };
 
   const handleCopy = () => {
@@ -172,14 +187,15 @@ export default function SocialMedia() {
                 <Share2 className="h-4 w-4 text-primary" />
                 <h2 className="font-bold text-sm uppercase tracking-wide">Publicar en</h2>
               </div>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { id: "whatsapp" as const, label: "WhatsApp", icon: MessageCircle },
                   { id: "facebook" as const, label: "Facebook", icon: Facebook },
                   { id: "instagram" as const, label: "Instagram", icon: Instagram },
+                  { id: "tiktok" as const, label: "TikTok", icon: TikTokIcon },
                 ].map(({ id, label, icon: Icon }) => (
                   <button key={id} onClick={() => setActiveTab(id)}
-                    className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-xl border text-xs font-bold transition-all`}
+                    className={`flex flex-col items-center gap-1 py-3 rounded-xl border text-xs font-bold transition-all`}
                     style={{
                       borderColor: activeTab === id ? platformColors[id] : "#374151",
                       background: activeTab === id ? platformColors[id] + "22" : "transparent",
@@ -198,7 +214,7 @@ export default function SocialMedia() {
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs font-black text-primary-foreground">G</div>
                   <div>
                     <div className="text-sm font-bold text-white">GTR CUBAUTO</div>
-                    <div className="text-xs text-zinc-500">{activeTab === "whatsapp" ? "Grupo WhatsApp" : activeTab === "facebook" ? "Página Facebook" : "@gtrcubauto"}</div>
+                    <div className="text-xs text-zinc-500">{activeTab === "whatsapp" ? "Grupo WhatsApp" : activeTab === "facebook" ? "Página Facebook" : activeTab === "tiktok" ? "TikTok · @gtrcubauto" : "@gtrcubauto"}</div>
                   </div>
                 </div>
                 {selectedProduct && (
@@ -231,6 +247,25 @@ export default function SocialMedia() {
                     <Button variant="outline" onClick={handleCopy} className="w-full gap-2 text-xs border-pink-500/50 text-pink-400">
                       <Copy className="h-3 w-3" /> Copiar texto para Instagram
                     </Button>
+                  </div>
+                )}
+                {activeTab === "tiktok" && (
+                  <div className="space-y-2">
+                    <Button onClick={handleTikTokUpload} className="w-full gap-2 text-white" style={{ background: "#fe2c55" }} disabled={!generatedText}>
+                      <TikTokIcon className="h-4 w-4" /> Publicar en TikTok <ExternalLink className="h-3 w-3" />
+                    </Button>
+                    <div className="rounded-xl border border-zinc-700 p-4 text-sm text-zinc-400 space-y-2">
+                      <p><strong className="text-white">Cómo publicar en TikTok:</strong></p>
+                      <ol className="list-decimal list-inside space-y-1 text-xs">
+                        <li>Copia el texto con el botón "Copiar"</li>
+                        <li>Pulsa "Publicar en TikTok" para abrir TikTok Studio</li>
+                        <li>Sube tu video o foto del producto</li>
+                        <li>Pega el texto en la descripción y publica</li>
+                      </ol>
+                      <Button variant="outline" onClick={handleCopy} className="w-full gap-2 text-xs" style={{ borderColor: "#fe2c5580", color: "#fe2c55" }}>
+                        <Copy className="h-3 w-3" /> Copiar texto para TikTok
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -272,6 +307,7 @@ export default function SocialMedia() {
                     style={{ background: platformColors[post.platform.toLowerCase() as keyof typeof platformColors] + "22" }}>
                     {post.platform === "WhatsApp" ? <MessageCircle className="h-4 w-4" style={{ color: "#25d366" }} /> :
                      post.platform === "Facebook" ? <Facebook className="h-4 w-4" style={{ color: "#1877f2" }} /> :
+                     post.platform === "TikTok" ? <TikTokIcon className="h-4 w-4" style={{ color: "#fe2c55" }} /> :
                      <Instagram className="h-4 w-4" style={{ color: "#e1306c" }} />}
                   </div>
                   <div className="min-w-0">
