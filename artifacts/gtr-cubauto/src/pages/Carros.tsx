@@ -13,7 +13,7 @@ const NEON = "#00ff41";
 export default function Carros() {
   const { data: allProducts, isLoading } = useListProducts();
   const config = useSiteConfig();
-  const products = allProducts?.filter(p => !p.category.startsWith("Motos"));
+  const products = allProducts?.filter(p => !p.category.startsWith("Motos") && !p.category.startsWith("Multiservicio"));
   const [checkoutProduct, setCheckoutProduct] = useState<{ id: number; name: string; price: number; stock: number } | null>(null);
   const { addItem, isInCart } = useCart();
 

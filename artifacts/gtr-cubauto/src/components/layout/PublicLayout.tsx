@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Package, LogIn, Menu, X, Bike, Car, Wrench, Users, ShoppingCart } from "lucide-react";
+import { Package, LogIn, Menu, X, Bike, Car, Wrench, Users, ShoppingCart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/motos", label: "Motos", icon: Bike },
   { href: "/carros", label: "Carros", icon: Car },
   { href: "/piezas", label: "Piezas", icon: Wrench },
+  { href: "/multiservicio", label: "Multiservicio", icon: Sparkles },
   { href: "/mayorista", label: "Mayorista", icon: Users },
 ];
 

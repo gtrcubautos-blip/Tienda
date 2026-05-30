@@ -9,6 +9,7 @@ export interface SiteConfig {
   motosImage: string;
   carrosImage: string;
   piezasImage: string;
+  multiservicioImage: string;
   whatsapp: string;
   email: string;
   zellePhone: string;
@@ -30,6 +31,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
   motosImage: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1400&q=85&fit=crop",
   carrosImage: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=85&fit=crop",
   piezasImage: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=85&fit=crop",
+  multiservicioImage: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1400&q=85&fit=crop",
   whatsapp: "+1 (305) 555-0198",
   email: "pagos@gtrcubauto.com",
   zellePhone: "+1 (305) 555-0198",

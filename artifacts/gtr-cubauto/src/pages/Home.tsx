@@ -15,6 +15,7 @@ const CATEGORIES = [
   { href: "/motos", label: "Motos", subtitle: "Repuestos & Accesorios", desc: "Aceites, cadenas, filtros, frenos y todo para tu moto.", badge: "MOTOS" },
   { href: "/carros", label: "Carros", subtitle: "Piezas para Automóviles", desc: "Motores, suspensión, frenos, eléctrico y mucho más.", badge: "CARROS" },
   { href: "/piezas", label: "Piezas", subtitle: "Catálogo Completo", desc: "Bujías, baterías, correas, filtros y repuestos universales.", badge: "PIEZAS" },
+  { href: "/multiservicio", label: "Multiservicio", subtitle: "Productos & Servicios", desc: "Nuevos productos y servicios adicionales para ti.", badge: "MULTISERVICIO" },
 ];
 
 export default function Home() {
@@ -22,7 +23,7 @@ export default function Home() {
   const config = useSiteConfig();
   const featured = products?.slice(0, 4) ?? [];
 
-  const CATEGORY_IMAGES = [config.motosImage, config.carrosImage, config.piezasImage];
+  const CATEGORY_IMAGES = [config.motosImage, config.carrosImage, config.piezasImage, config.multiservicioImage];
 
   return (
     <PublicLayout>
@@ -144,7 +145,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-black text-white">Nuestras <span className="neon-text" style={{ color: NEON }}>Categorías</span></h2>
             <p className="mt-2 text-sm" style={{ color: "#555" }}>Selecciona lo que necesitas</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {CATEGORIES.map((cat, i) => (
               <Link key={cat.href} href={cat.href} className="group relative overflow-hidden rounded-2xl cursor-pointer block" style={{ minHeight: 360 }}>
                 <img src={CATEGORY_IMAGES[i]} alt={cat.label} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

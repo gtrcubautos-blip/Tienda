@@ -9,6 +9,7 @@ import Home from "@/pages/Home";
 import Motos from "@/pages/Motos";
 import Carros from "@/pages/Carros";
 import Piezas from "@/pages/Piezas";
+import Multiservicio from "@/pages/Multiservicio";
 import Mayorista from "@/pages/Mayorista";
 import AdminLogin from "@/pages/AdminLogin";
 import Dashboard from "@/pages/admin/Dashboard";
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/motos" component={Motos} />
       <Route path="/carros" component={Carros} />
       <Route path="/piezas" component={Piezas} />
+      <Route path="/multiservicio" component={Multiservicio} />
       <Route path="/mayorista" component={Mayorista} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={Dashboard} />

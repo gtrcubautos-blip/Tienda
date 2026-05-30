@@ -149,6 +149,7 @@ export default function Personalizacion() {
               { key: "motosImage" as const, label: "Página Motos", hint: "Imagen de moto" },
               { key: "carrosImage" as const, label: "Página Carros", hint: "Imagen de auto" },
               { key: "piezasImage" as const, label: "Página Piezas", hint: "Imagen de motor/piezas" },
+              { key: "multiservicioImage" as const, label: "Página Multiservicio", hint: "Imagen de productos/servicios" },
             ].map(({ key, label, hint }) => (
               <div key={key} className="rounded-xl border border-border bg-card p-5 space-y-4">
                 <div className="text-xs font-black uppercase tracking-wide text-muted-foreground">{label}</div>
