@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useListProducts } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Share2, Instagram, Facebook, MessageCircle, Copy, Sparkles, CheckCheck, Clock, Zap, ExternalLink } from "lucide-react";
+import { Share2, Instagram, Facebook, MessageCircle, Copy, Sparkles, CheckCheck, Clock, Zap, ExternalLink, Upload, Video, Download, X, ImagePlus } from "lucide-react";
 
 function TikTokIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
@@ -41,6 +41,10 @@ export default function SocialMedia() {
   const [activeTab, setActiveTab] = useState<"whatsapp" | "facebook" | "instagram" | "tiktok">("whatsapp");
   const [copied, setCopied] = useState(false);
   const [discount, setDiscount] = useState("");
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
+  const [mediaName, setMediaName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedProduct = products?.find(p => p.id === selectedProductId);
   const template = TEMPLATES.find(t => t.id === selectedTemplate);
@@ -59,6 +63,43 @@ export default function SocialMedia() {
     facebook: "#1877f2",
     instagram: "#e1306c",
     tiktok: "#fe2c55",
+  };
+
+  const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const isVideo = file.type.startsWith("video/");
+    const isImage = file.type.startsWith("image/");
+    if (!isVideo && !isImage) {
+      toast({ title: "Formato no válido", description: "Sube una imagen o un video.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      toast({ title: "Archivo muy grande", description: "El máximo es 100 MB.", variant: "destructive" });
+      return;
+    }
+    if (mediaUrl) URL.revokeObjectURL(mediaUrl);
+    const url = URL.createObjectURL(file);
+    setMediaUrl(url);
+    setMediaType(isVideo ? "video" : "image");
+    setMediaName(file.name);
+    toast({ title: isVideo ? "Video cargado" : "Imagen cargada", description: file.name });
+  };
+
+  const handleRemoveMedia = () => {
+    if (mediaUrl) URL.revokeObjectURL(mediaUrl);
+    setMediaUrl(null);
+    setMediaType(null);
+    setMediaName("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleDownloadMedia = () => {
+    if (!mediaUrl) return;
+    const a = document.createElement("a");
+    a.href = mediaUrl;
+    a.download = mediaName || "gtr-cubauto-media";
+    a.click();
   };
 
   const handleTikTokUpload = () => {
@@ -177,6 +218,69 @@ export default function SocialMedia() {
               />
               <div className="text-xs text-muted-foreground text-right">{generatedText.length} caracteres</div>
             </div>
+
+            {/* Step 4: Media (foto o video) */}
+            <div className="rounded-xl border border-border bg-card p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs font-black text-primary-foreground">4</div>
+                <h2 className="font-bold text-sm uppercase tracking-wide">Subir Foto o Video</h2>
+              </div>
+              <p className="text-xs text-muted-foreground">Sube tu propia imagen o video para publicar en Facebook, Instagram o TikTok.</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*"
+                className="hidden"
+                onChange={handleMediaSelect}
+                data-testid="input-media-upload"
+              />
+              {!mediaUrl ? (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full border-2 border-dashed border-border rounded-xl py-8 flex flex-col items-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                  data-testid="btn-upload-media"
+                >
+                  <Upload className="h-6 w-6" />
+                  <span className="text-sm font-semibold">Haz clic para subir</span>
+                  <span className="text-xs">Imágenes (JPG, PNG) o Videos (MP4, MOV) · máx. 100 MB</span>
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="relative rounded-xl overflow-hidden border border-border">
+                    {mediaType === "video" ? (
+                      <video src={mediaUrl} controls className="w-full max-h-56 bg-black" data-testid="media-preview-video" />
+                    ) : (
+                      <img src={mediaUrl} alt="media" className="w-full max-h-56 object-contain bg-black" data-testid="media-preview-image" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleRemoveMedia}
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                      data-testid="btn-remove-media"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-muted-foreground truncate flex items-center gap-1 min-w-0">
+                      {mediaType === "video" ? <Video className="h-3 w-3 shrink-0" /> : <ImagePlus className="h-3 w-3 shrink-0" />}
+                      <span className="truncate">{mediaName}</span>
+                    </span>
+                    <Button variant="outline" size="sm" onClick={handleDownloadMedia} className="gap-1 text-xs shrink-0" data-testid="btn-download-media">
+                      <Download className="h-3 w-3" /> Descargar
+                    </Button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Cambiar archivo
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* RIGHT: Preview + Share */}
@@ -217,9 +321,15 @@ export default function SocialMedia() {
                     <div className="text-xs text-zinc-500">{activeTab === "whatsapp" ? "Grupo WhatsApp" : activeTab === "facebook" ? "Página Facebook" : activeTab === "tiktok" ? "TikTok · @gtrcubauto" : "@gtrcubauto"}</div>
                   </div>
                 </div>
-                {selectedProduct && (
+                {mediaUrl ? (
+                  mediaType === "video" ? (
+                    <video src={mediaUrl} controls className="w-full max-h-48 rounded-lg bg-black" />
+                  ) : (
+                    <img src={mediaUrl} alt="media" className="w-full h-32 object-cover rounded-lg" />
+                  )
+                ) : selectedProduct ? (
                   <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-32 object-cover rounded-lg" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                )}
+                ) : null}
                 <pre className="text-xs text-zinc-300 whitespace-pre-wrap font-sans leading-relaxed max-h-32 overflow-y-auto">{generatedText || "Genera el texto para ver la vista previa..."}</pre>
               </div>
 
@@ -240,9 +350,9 @@ export default function SocialMedia() {
                     <p><strong className="text-white">Instrucciones Instagram:</strong></p>
                     <ol className="list-decimal list-inside space-y-1 text-xs">
                       <li>Copia el texto con el botón "Copiar"</li>
-                      <li>Descarga la imagen del producto</li>
+                      <li>Descarga tu foto o video (botón "Descargar")</li>
                       <li>Abre Instagram en tu teléfono</li>
-                      <li>Crea un nuevo post y pega el texto</li>
+                      <li>Crea un nuevo post o Reel y pega el texto</li>
                     </ol>
                     <Button variant="outline" onClick={handleCopy} className="w-full gap-2 text-xs border-pink-500/50 text-pink-400">
                       <Copy className="h-3 w-3" /> Copiar texto para Instagram
