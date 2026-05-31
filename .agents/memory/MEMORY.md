@@ -1,0 +1,1 @@
+- [Publish detection vs .gitignore](deployment-publish-detection.md) — never gitignore `.replit-artifact/`; it triggers "could not find run command". Also: vite.config must not hard-require PORT at build.
