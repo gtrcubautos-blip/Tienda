@@ -34,7 +34,8 @@ _Describe the high-level user-facing capabilities of this app once they exist._
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Communicate in Spanish at all times.
+- After completing important changes, push to GitHub automatically (repo: `gtrcubautos-blip/Tienda`, branch `main`). See `.agents/memory/github-push.md` for the exact procedure.
 
 ## Gotchas
 
