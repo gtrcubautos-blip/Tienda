@@ -221,6 +221,21 @@ export interface OrderInput {
   discountCode?: string;
 }
 
+export interface QuoteWhatsapp {
+  id: number;
+  label: string;
+  number: string;
+}
+
+export interface QuoteWhatsappInput {
+  label?: string;
+  number: string;
+}
+
+export interface QuoteWhatsappsReplace {
+  items: QuoteWhatsappInput[];
+}
+
 export interface Customer {
   id: number;
   name: string;

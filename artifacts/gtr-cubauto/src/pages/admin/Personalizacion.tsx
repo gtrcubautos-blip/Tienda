@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { getSiteConfig, setSiteConfig, DEFAULT_CONFIG, type SiteConfig } from "@/hooks/use-site-config";
+import { useListQuoteWhatsapps, useReplaceQuoteWhatsapps, getListQuoteWhatsappsQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Save, RotateCcw, Eye, ImageIcon, MessageSquare, Phone, Globe, MessageCircle, Plus, Trash2 } from "lucide-react";
 
 const TABS = [
@@ -18,9 +20,17 @@ type TabId = typeof TABS[number]["id"];
 
 export default function Personalizacion() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabId>("hero");
   const [config, setConfig] = useState<SiteConfig>(getSiteConfig);
   const [saved, setSaved] = useState(false);
+
+  const { data: quoteData } = useListQuoteWhatsapps();
+  const replaceQuotes = useReplaceQuoteWhatsapps();
+  const [quotes, setQuotes] = useState<Array<{ label: string; number: string }>>([]);
+  useEffect(() => {
+    if (quoteData) setQuotes(quoteData.map(q => ({ label: q.label, number: q.number })));
+  }, [quoteData]);
 
   const handleSave = () => {
     setSiteConfig(config);
@@ -42,12 +52,28 @@ export default function Personalizacion() {
   };
 
   const updateQuote = (i: number, field: "label" | "number", val: string) => {
-    const quoteWhatsapps = [...config.quoteWhatsapps];
-    quoteWhatsapps[i] = { ...quoteWhatsapps[i], [field]: val };
-    setConfig({ ...config, quoteWhatsapps });
+    setQuotes(prev => prev.map((q, idx) => (idx === i ? { ...q, [field]: val } : q)));
   };
-  const addQuote = () => setConfig({ ...config, quoteWhatsapps: [...config.quoteWhatsapps, { label: "", number: "" }] });
-  const removeQuote = (i: number) => setConfig({ ...config, quoteWhatsapps: config.quoteWhatsapps.filter((_, idx) => idx !== i) });
+  const addQuote = () => setQuotes(prev => [...prev, { label: "", number: "" }]);
+  const removeQuote = (i: number) => setQuotes(prev => prev.filter((_, idx) => idx !== i));
+
+  const handleSaveQuotes = () => {
+    const items = quotes
+      .map(q => ({ label: q.label.trim(), number: q.number.trim() }))
+      .filter(q => q.number.length > 0);
+    replaceQuotes.mutate(
+      { data: { items } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListQuoteWhatsappsQueryKey() });
+          toast({ title: "Números guardados", description: "Los WhatsApp de cotización se aplicaron para todos los clientes." });
+        },
+        onError: () => {
+          toast({ title: "Error al guardar", description: "No se pudieron guardar los números. Inténtalo de nuevo.", variant: "destructive" });
+        },
+      },
+    );
+  };
 
   return (
     <AdminLayout>
@@ -230,7 +256,7 @@ export default function Personalizacion() {
                 Si agregas varios, el cliente podrá elegir a quién escribir. Usa el código de país (ej: +53...).
               </p>
               <div className="space-y-3">
-                {config.quoteWhatsapps.map((q, i) => (
+                {quotes.map((q, i) => (
                   <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-end">
                     <div className="space-y-1 flex-1">
                       <Label>Nombre / etiqueta</Label>
@@ -246,9 +272,14 @@ export default function Personalizacion() {
                     </Button>
                   </div>
                 ))}
-                {config.quoteWhatsapps.length === 0 && (
+                {quotes.length === 0 && (
                   <p className="text-xs text-muted-foreground">No hay números configurados. Agrega al menos uno para activar la cotización por WhatsApp.</p>
                 )}
+              </div>
+              <div className="flex justify-end pt-1">
+                <Button onClick={handleSaveQuotes} disabled={replaceQuotes.isPending} className="gap-2">
+                  <Save className="h-4 w-4" /> {replaceQuotes.isPending ? "Guardando..." : "Guardar números"}
+                </Button>
               </div>
             </div>
           </div>

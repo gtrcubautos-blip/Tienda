@@ -36,6 +36,8 @@ import type {
   Product,
   ProductInput,
   ProductUpdate,
+  QuoteWhatsapp,
+  QuoteWhatsappsReplace,
   UploadUrlRequest,
   UploadUrlResponse,
   WholesaleCustomerInput,
@@ -1007,6 +1009,154 @@ export const useCreateOrder = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateOrderMutationOptions(options));
+    }
+
+export const getListQuoteWhatsappsUrl = () => {
+
+
+
+
+  return `/api/quote-whatsapps`
+}
+
+/**
+ * @summary List WhatsApp numbers used for cart quote requests
+ */
+export const listQuoteWhatsapps = async ( options?: RequestInit): Promise<QuoteWhatsapp[]> => {
+
+  return customFetch<QuoteWhatsapp[]>(getListQuoteWhatsappsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListQuoteWhatsappsQueryKey = () => {
+    return [
+    `/api/quote-whatsapps`
+    ] as const;
+    }
+
+
+export const getListQuoteWhatsappsQueryOptions = <TData = Awaited<ReturnType<typeof listQuoteWhatsapps>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listQuoteWhatsapps>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListQuoteWhatsappsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listQuoteWhatsapps>>> = ({ signal }) => listQuoteWhatsapps({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listQuoteWhatsapps>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListQuoteWhatsappsQueryResult = NonNullable<Awaited<ReturnType<typeof listQuoteWhatsapps>>>
+export type ListQuoteWhatsappsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List WhatsApp numbers used for cart quote requests
+ */
+
+export function useListQuoteWhatsapps<TData = Awaited<ReturnType<typeof listQuoteWhatsapps>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listQuoteWhatsapps>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListQuoteWhatsappsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getReplaceQuoteWhatsappsUrl = () => {
+
+
+
+
+  return `/api/quote-whatsapps`
+}
+
+/**
+ * @summary Replace the full list of quote WhatsApp numbers
+ */
+export const replaceQuoteWhatsapps = async (quoteWhatsappsReplace: QuoteWhatsappsReplace, options?: RequestInit): Promise<QuoteWhatsapp[]> => {
+
+  return customFetch<QuoteWhatsapp[]>(getReplaceQuoteWhatsappsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      quoteWhatsappsReplace,)
+  }
+);}
+
+
+
+
+export const getReplaceQuoteWhatsappsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceQuoteWhatsapps>>, TError,{data: BodyType<QuoteWhatsappsReplace>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof replaceQuoteWhatsapps>>, TError,{data: BodyType<QuoteWhatsappsReplace>}, TContext> => {
+
+const mutationKey = ['replaceQuoteWhatsapps'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof replaceQuoteWhatsapps>>, {data: BodyType<QuoteWhatsappsReplace>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  replaceQuoteWhatsapps(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReplaceQuoteWhatsappsMutationResult = NonNullable<Awaited<ReturnType<typeof replaceQuoteWhatsapps>>>
+    export type ReplaceQuoteWhatsappsMutationBody = BodyType<QuoteWhatsappsReplace>
+    export type ReplaceQuoteWhatsappsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Replace the full list of quote WhatsApp numbers
+ */
+export const useReplaceQuoteWhatsapps = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceQuoteWhatsapps>>, TError,{data: BodyType<QuoteWhatsappsReplace>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof replaceQuoteWhatsapps>>,
+        TError,
+        {data: BodyType<QuoteWhatsappsReplace>},
+        TContext
+      > => {
+      return useMutation(getReplaceQuoteWhatsappsMutationOptions(options));
     }
 
 export const getListCustomersUrl = () => {

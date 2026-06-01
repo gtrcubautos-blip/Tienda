@@ -247,6 +247,35 @@ export const CreateOrderBody = zod.object({
 
 
 /**
+ * @summary List WhatsApp numbers used for cart quote requests
+ */
+export const ListQuoteWhatsappsResponseItem = zod.object({
+  "id": zod.number(),
+  "label": zod.string(),
+  "number": zod.string()
+})
+export const ListQuoteWhatsappsResponse = zod.array(ListQuoteWhatsappsResponseItem)
+
+
+/**
+ * @summary Replace the full list of quote WhatsApp numbers
+ */
+export const ReplaceQuoteWhatsappsBody = zod.object({
+  "items": zod.array(zod.object({
+  "label": zod.string().optional(),
+  "number": zod.string()
+}))
+})
+
+export const ReplaceQuoteWhatsappsResponseItem = zod.object({
+  "id": zod.number(),
+  "label": zod.string(),
+  "number": zod.string()
+})
+export const ReplaceQuoteWhatsappsResponse = zod.array(ReplaceQuoteWhatsappsResponseItem)
+
+
+/**
  * @summary List all registered customers
  */
 export const ListCustomersResponseItem = zod.object({

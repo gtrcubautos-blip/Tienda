@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCart } from "@/contexts/CartContext";
 import { CUBA_PROVINCES } from "@/components/WelcomeModal";
 import { isRegistered, WelcomeModal } from "@/components/WelcomeModal";
-import { useCreateOrder, getListProductsQueryKey } from "@workspace/api-client-react";
+import { useCreateOrder, getListProductsQueryKey, useListQuoteWhatsapps } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSiteConfig } from "@/hooks/use-site-config";
@@ -49,7 +49,8 @@ export function CartDrawer() {
   const [address, setAddress] = useState("");
   const [showQuotePicker, setShowQuotePicker] = useState(false);
 
-  const quoteNumbers = (cfg.quoteWhatsapps ?? []).filter(q => q.number && q.number.replace(/\D/g, "").length >= 8);
+  const { data: quoteData } = useListQuoteWhatsapps();
+  const quoteNumbers = (quoteData ?? []).filter(q => q.number && q.number.replace(/\D/g, "").length >= 8);
 
   const buildQuoteText = () => {
     const lines = items.map(it => `• ${it.name} x${it.qty} — $${(it.price * it.qty).toFixed(2)}`);

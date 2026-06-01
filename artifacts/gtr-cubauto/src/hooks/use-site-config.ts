@@ -11,7 +11,6 @@ export interface SiteConfig {
   piezasImage: string;
   multiservicioImage: string;
   whatsapp: string;
-  quoteWhatsapps: Array<{ label: string; number: string }>;
   email: string;
   zellePhone: string;
   fbUrl: string;
@@ -34,7 +33,6 @@ export const DEFAULT_CONFIG: SiteConfig = {
   piezasImage: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=85&fit=crop",
   multiservicioImage: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1400&q=85&fit=crop",
   whatsapp: "+1 (305) 555-0198",
-  quoteWhatsapps: [{ label: "Ventas", number: "+53 5 555 5555" }],
   email: "pagos@gtrcubauto.com",
   zellePhone: "+1 (305) 555-0198",
   fbUrl: "https://facebook.com/gtrcubauto",

@@ -1,1 +1,2 @@
-- [Publish detection vs .gitignore](deployment-publish-detection.md) — never gitignore `.replit-artifact/`; it triggers "could not find run command". Also: vite.config must not hard-require PORT at build.
+- [GitHub push procedure](github-push.md) — force-push via token credential helper; fetch/merge blocked by .git/objects filesystem block.
+- [Admin-write APIs unauthenticated](admin-write-apis-unauthenticated.md) — admin auth is client-side only by design; don't add per-route server auth, it's a whole-app decision.

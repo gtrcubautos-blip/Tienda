@@ -8,6 +8,7 @@ import dashboardRouter from "./dashboard";
 import exportRouter from "./export";
 import customersRouter from "./customers";
 import wholesaleCustomersRouter from "./wholesale-customers";
+import quoteWhatsappsRouter from "./quote-whatsapps";
 import storageRouter from "./storage";
 
 const router: IRouter = Router();
@@ -23,6 +24,7 @@ router.use(dashboardRouter);
 router.use(exportRouter);
 router.use("/customers", customersRouter);
 router.use("/wholesale-customers", wholesaleCustomersRouter);
+router.use(quoteWhatsappsRouter);
 router.use(storageRouter);
 
 export default router;

@@ -15,6 +15,7 @@ tags:
   - name: dashboard
   - name: customers
   - name: wholesale-customers
+  - name: quote-whatsapps
   - name: Storage
 
 paths:
@@ -242,6 +243,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+
+  /quote-whatsapps:
+    get:
+      operationId: listQuoteWhatsapps
+      tags: [quote-whatsapps]
+      summary: List WhatsApp numbers used for cart quote requests
+      responses:
+        "200":
+          description: Quote WhatsApp number list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuoteWhatsapp"
+    put:
+      operationId: replaceQuoteWhatsapps
+      tags: [quote-whatsapps]
+      summary: Replace the full list of quote WhatsApp numbers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteWhatsappsReplace"
+      responses:
+        "200":
+          description: Updated list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuoteWhatsapp"
 
   /customers:
     get:
@@ -672,6 +707,35 @@ components:
           enum: [retail, wholesale]
         discountCode:
           type: string
+
+    QuoteWhatsapp:
+      type: object
+      required: [id, label, number]
+      properties:
+        id:
+          type: integer
+        label:
+          type: string
+        number:
+          type: string
+
+    QuoteWhatsappInput:
+      type: object
+      required: [number]
+      properties:
+        label:
+          type: string
+        number:
+          type: string
+
+    QuoteWhatsappsReplace:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteWhatsappInput"
 
     Customer:
       type: object
