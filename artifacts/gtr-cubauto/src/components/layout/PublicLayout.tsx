@@ -28,13 +28,8 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-50 w-full" style={{ background: "rgba(0,0,0,0.95)", borderBottom: `1px solid ${NEON_BORDER}`, backdropFilter: "blur(12px)" }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0" data-testid="link-logo">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center neon-glow" style={{ background: NEON }}>
-              <Package className="h-4 w-4 text-black" />
-            </div>
-            <span className="font-black text-lg tracking-tight">
-              GTR <span className="neon-text" style={{ color: NEON }}>CUBAUTO</span>
-            </span>
+          <Link href="/" className="flex items-center shrink-0" data-testid="link-logo">
+            <img src={logoGtr} alt="GTR CUBAUTO" className="h-10 w-auto object-contain" />
           </Link>
 
           {/* Desktop Nav */}
@@ -85,10 +80,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <Button variant="ghost" size="icon" className="md:hidden" style={{ color: "#fff" }} onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
-
-            <Link href="/" className="flex items-center shrink-0 ml-1" data-testid="link-logo-img">
-              <img src={logoGtr} alt="GTR CUBAUTO" className="h-9 w-auto object-contain" />
-            </Link>
           </div>
         </div>
 
