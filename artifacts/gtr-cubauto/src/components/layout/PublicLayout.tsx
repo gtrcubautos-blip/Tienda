@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Package, LogIn, Menu, X, Bike, Car, Wrench, Users, ShoppingCart, Sparkles } from "lucide-react";
+import { Package, Menu, X, Bike, Car, Wrench, Users, ShoppingCart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -71,12 +71,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
               )}
             </button>
 
-            <Button variant="outline" size="sm" asChild className="hidden md:flex font-semibold"
-              style={{ borderColor: NEON_BORDER, color: "rgba(255,255,255,0.6)", background: "transparent" }}>
-              <Link href="/admin" data-testid="link-admin">
-                <LogIn className="h-4 w-4 mr-1.5" /> Admin
-              </Link>
-            </Button>
             <Button variant="ghost" size="icon" className="md:hidden" style={{ color: "#fff" }} onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
@@ -94,9 +88,6 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                 <Icon className="h-4 w-4" />{label}
               </Link>
             ))}
-            <Link href="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm" style={{ color: "#555" }}>
-              <LogIn className="h-4 w-4" /> Acceso Admin
-            </Link>
           </div>
         )}
       </header>
@@ -120,7 +111,19 @@ export function PublicLayout({ children }: { children: ReactNode }) {
                 >{label}</Link>
               ))}
             </div>
-            <p className="text-xs" style={{ color: "#333" }}>© {new Date().getFullYear()} GTR CUBAUTO — Cuba</p>
+            <p className="text-xs" style={{ color: "#333" }}>
+              © {new Date().getFullYear()} GTR CUBAUTO — Cuba ·{" "}
+              <Link
+                href="/admin"
+                data-testid="link-gerardo"
+                className="transition-colors"
+                style={{ color: "#333" }}
+                onMouseEnter={e => (e.currentTarget.style.color = NEON)}
+                onMouseLeave={e => (e.currentTarget.style.color = "#333")}
+              >
+                Gerardo
+              </Link>
+            </p>
           </div>
         </div>
       </footer>
