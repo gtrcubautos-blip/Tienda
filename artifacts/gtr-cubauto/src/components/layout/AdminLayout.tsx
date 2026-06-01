@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PackageSearch, DollarSign, Percent, ShoppingBag, Settings, LogOut, Share2, Paintbrush, Users, Menu, X } from "lucide-react";
+import { LayoutDashboard, PackageSearch, DollarSign, Percent, ShoppingBag, Settings, LogOut, Share2, Paintbrush, Users, Menu, X, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
@@ -42,7 +42,15 @@ function NavList({ location, onNavigate, handleLogout }: { location: string; onN
           );
         })}
       </nav>
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="p-4 border-t border-sidebar-border space-y-2">
+        <Link
+          href="/"
+          onClick={onNavigate}
+          data-testid="link-back-store"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
+        >
+          <Store className="h-4 w-4 shrink-0" /> Volver a la tienda
+        </Link>
         <Button
           variant="outline"
           className="w-full justify-start text-sidebar-foreground border-sidebar-border"

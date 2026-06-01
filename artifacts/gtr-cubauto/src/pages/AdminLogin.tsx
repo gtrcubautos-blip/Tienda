@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
-import { Package } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import { Package, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,10 +51,17 @@ export default function AdminLogin() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-3">
             <Button type="submit" className="w-full text-white font-medium" size="lg">
               Acceder al Sistema
             </Button>
+            <Link
+              href="/"
+              data-testid="link-back-store"
+              className="flex items-center justify-center gap-1.5 text-sm text-zinc-400 hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" /> Volver a la tienda
+            </Link>
           </CardFooter>
         </form>
       </Card>
