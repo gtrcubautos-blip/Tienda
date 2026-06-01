@@ -4,6 +4,7 @@ import { Package, LogIn, Menu, X, Bike, Car, Wrench, Users, ShoppingCart, Sparkl
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
+import logoGtr from "@/assets/logo-gtr.png";
 
 const NEON = "#00ff41";
 const NEON_BORDER = "#00ff4128";
@@ -84,6 +85,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <Button variant="ghost" size="icon" className="md:hidden" style={{ color: "#fff" }} onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
+
+            <Link href="/" className="flex items-center shrink-0 ml-1" data-testid="link-logo-img">
+              <img src={logoGtr} alt="GTR CUBAUTO" className="h-9 w-auto object-contain" />
+            </Link>
           </div>
         </div>
 
