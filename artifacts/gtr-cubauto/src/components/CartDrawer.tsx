@@ -10,10 +10,10 @@ import { isRegistered, WelcomeModal } from "@/components/WelcomeModal";
 import { useCreateOrder, getListProductsQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { getSiteConfig } from "@/hooks/use-site-config";
+import { useSiteConfig } from "@/hooks/use-site-config";
 import {
   Trash2, Plus, Minus, ShoppingBag, CreditCard, Smartphone, Truck,
-  CheckCircle2, MapPin, ShoppingCart
+  CheckCircle2, MapPin, ShoppingCart, MessageCircle
 } from "lucide-react";
 
 const NEON = "#00ff41";
@@ -32,7 +32,7 @@ export function CartDrawer() {
   const createOrder = useCreateOrder();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const cfg = getSiteConfig();
+  const cfg = useSiteConfig();
 
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "checkout" | "success">("cart");
   const [needsRegistration, setNeedsRegistration] = useState(false);
@@ -47,6 +47,38 @@ export function CartDrawer() {
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
   const [address, setAddress] = useState("");
+  const [showQuotePicker, setShowQuotePicker] = useState(false);
+
+  const quoteNumbers = (cfg.quoteWhatsapps ?? []).filter(q => q.number && q.number.replace(/\D/g, "").length >= 8);
+
+  const buildQuoteText = () => {
+    const lines = items.map(it => `• ${it.name} x${it.qty} — $${(it.price * it.qty).toFixed(2)}`);
+    const name = (clientName || savedData.name || "").trim();
+    return [
+      "🏁 *GTR CUBAUTO* — Solicitud de cotización",
+      "",
+      ...lines,
+      "",
+      `Total estimado: $${totalPrice.toFixed(2)} USD`,
+      name ? `Cliente: ${name}` : "",
+    ].filter(Boolean).join("\n");
+  };
+
+  const openQuote = (number: string) => {
+    const digits = number.replace(/\D/g, "");
+    window.open(`https://wa.me/${digits}?text=${encodeURIComponent(buildQuoteText())}`, "_blank");
+    setShowQuotePicker(false);
+  };
+
+  const handleQuote = () => {
+    if (items.length === 0) return;
+    if (quoteNumbers.length === 0) {
+      toast({ title: "WhatsApp no configurado", description: "Configura un número de cotización en el panel de administración (Personalización → WhatsApp para Cotizaciones).", variant: "destructive" });
+      return;
+    }
+    if (quoteNumbers.length === 1) { openQuote(quoteNumbers[0].number); return; }
+    setShowQuotePicker(p => !p);
+  };
 
   const handleProceedToCheckout = () => {
     if (!isRegistered()) {
@@ -227,6 +259,27 @@ export function CartDrawer() {
                     style={{ background: NEON }} onClick={handleProceedToCheckout}>
                     Proceder al Pago
                   </Button>
+                  <Button type="button" onClick={handleQuote}
+                    className="w-full rounded-full font-bold py-5 gap-2 text-white border-0"
+                    style={{ background: "#25d366" }}>
+                    <MessageCircle className="h-4 w-4" /> Solicitar cotización por WhatsApp
+                  </Button>
+                  {showQuotePicker && quoteNumbers.length > 1 && (
+                    <div className="rounded-xl border p-2 space-y-1" style={{ borderColor: NEON_BORDER, background: "#050505" }}>
+                      <p className="text-xs px-2 py-1" style={{ color: "#888" }}>Elige a quién enviar la cotización:</p>
+                      {quoteNumbers.map((q, i) => (
+                        <button key={i} type="button" onClick={() => openQuote(q.number)}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white text-left transition-colors"
+                          style={{ background: "#111" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "#1a1a1a")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "#111")}>
+                          <MessageCircle className="h-4 w-4 shrink-0" style={{ color: "#25d366" }} />
+                          <span className="font-semibold truncate">{q.label || "WhatsApp"}</span>
+                          <span className="ml-auto text-xs shrink-0" style={{ color: "#666" }}>{q.number}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <button type="button" onClick={clearCart}
                     className="w-full text-xs text-center transition-colors"
                     style={{ color: "#444" }}

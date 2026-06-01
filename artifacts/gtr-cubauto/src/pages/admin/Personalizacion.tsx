@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { getSiteConfig, setSiteConfig, DEFAULT_CONFIG, type SiteConfig } from "@/hooks/use-site-config";
-import { Save, RotateCcw, Eye, ImageIcon, MessageSquare, Phone, Globe } from "lucide-react";
+import { Save, RotateCcw, Eye, ImageIcon, MessageSquare, Phone, Globe, MessageCircle, Plus, Trash2 } from "lucide-react";
 
 const TABS = [
   { id: "hero", label: "Hero Principal", icon: ImageIcon },
@@ -40,6 +40,14 @@ export default function Personalizacion() {
     promos[i] = { ...promos[i], [field]: val };
     setConfig({ ...config, promos });
   };
+
+  const updateQuote = (i: number, field: "label" | "number", val: string) => {
+    const quoteWhatsapps = [...config.quoteWhatsapps];
+    quoteWhatsapps[i] = { ...quoteWhatsapps[i], [field]: val };
+    setConfig({ ...config, quoteWhatsapps });
+  };
+  const addQuote = () => setConfig({ ...config, quoteWhatsapps: [...config.quoteWhatsapps, { label: "", number: "" }] });
+  const removeQuote = (i: number) => setConfig({ ...config, quoteWhatsapps: config.quoteWhatsapps.filter((_, idx) => idx !== i) });
 
   return (
     <AdminLayout>
@@ -204,6 +212,43 @@ export default function Personalizacion() {
                 <p className="font-semibold">Vista previa de contacto en checkout:</p>
                 <p>📱 Zelle: <strong>{config.zellePhone}</strong></p>
                 <p>📧 Email: <strong>{config.email}</strong></p>
+              </div>
+            </div>
+
+            {/* WhatsApp para cotizaciones */}
+            <div className="rounded-xl border border-border bg-card p-6 space-y-4 lg:col-span-2">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-bold flex items-center gap-2 text-sm uppercase tracking-wide text-muted-foreground">
+                  <MessageCircle className="h-4 w-4" /> WhatsApp para Cotizaciones
+                </h2>
+                <Button size="sm" variant="outline" onClick={addQuote} className="gap-2">
+                  <Plus className="h-4 w-4" /> Agregar número
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Estos números reciben las solicitudes de cotización que los clientes envían desde el carrito.
+                Si agregas varios, el cliente podrá elegir a quién escribir. Usa el código de país (ej: +53...).
+              </p>
+              <div className="space-y-3">
+                {config.quoteWhatsapps.map((q, i) => (
+                  <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-end">
+                    <div className="space-y-1 flex-1">
+                      <Label>Nombre / etiqueta</Label>
+                      <Input value={q.label} onChange={e => updateQuote(i, "label", e.target.value)} placeholder="Ej: Ventas, Gerardo" />
+                    </div>
+                    <div className="space-y-1 flex-1">
+                      <Label>Número WhatsApp</Label>
+                      <Input value={q.number} onChange={e => updateQuote(i, "number", e.target.value)} placeholder="+53 5 1234567" />
+                    </div>
+                    <Button variant="outline" size="icon" onClick={() => removeQuote(i)}
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10 shrink-0" aria-label="Eliminar número">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {config.quoteWhatsapps.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No hay números configurados. Agrega al menos uno para activar la cotización por WhatsApp.</p>
+                )}
               </div>
             </div>
           </div>
