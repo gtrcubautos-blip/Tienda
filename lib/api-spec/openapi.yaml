@@ -8,6 +8,7 @@ servers:
     description: Base API path
 tags:
   - name: health
+  - name: admin
   - name: products
   - name: wholesale
   - name: discounts
@@ -32,6 +33,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Authenticate as admin and obtain a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResult"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /products:
     get:
       operationId: listProducts
@@ -50,6 +76,8 @@ paths:
       operationId: createProduct
       tags: [products]
       summary: Create a product
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -69,6 +97,8 @@ paths:
       operationId: updateProduct
       tags: [products]
       summary: Update a product
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -92,6 +122,8 @@ paths:
       operationId: deleteProduct
       tags: [products]
       summary: Delete a product
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -107,6 +139,8 @@ paths:
       operationId: updateProductPrice
       tags: [products]
       summary: Update retail and wholesale price for a product
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -160,6 +194,8 @@ paths:
       operationId: createDiscount
       tags: [discounts]
       summary: Create a discount rule
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -179,6 +215,8 @@ paths:
       operationId: updateDiscount
       tags: [discounts]
       summary: Update a discount rule
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -202,6 +240,8 @@ paths:
       operationId: deleteDiscount
       tags: [discounts]
       summary: Delete a discount rule
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -244,6 +284,39 @@ paths:
               schema:
                 $ref: "#/components/schemas/Order"
 
+  /orders/{id}:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      summary: Update an order's status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /quote-whatsapps:
     get:
       operationId: listQuoteWhatsapps
@@ -262,6 +335,8 @@ paths:
       operationId: replaceQuoteWhatsapps
       tags: [quote-whatsapps]
       summary: Replace the full list of quote WhatsApp numbers
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -315,6 +390,8 @@ paths:
       operationId: deleteCustomer
       tags: [customers]
       summary: Delete a customer record
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -362,6 +439,8 @@ paths:
       operationId: deleteWholesaleCustomer
       tags: [wholesale-customers]
       summary: Delete a wholesale customer
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -377,6 +456,8 @@ paths:
       operationId: sendCampaign
       tags: [customers]
       summary: Log a campaign send to a customer segment
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -890,3 +971,32 @@ components:
           type: integer
         revenueToday:
           type: number
+
+    AdminLoginInput:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          minLength: 1
+
+    AdminLoginResult:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    OrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [completed, pending, cancelled]
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Admin session token issued by POST /admin/login

@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { LayoutDashboard, PackageSearch, DollarSign, Percent, ShoppingBag, Settings, LogOut, Share2, Paintbrush, Users, Menu, X, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { isAdminAuthed, clearAdminToken } from "@/lib/admin-token";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -68,12 +69,11 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const isAuth = localStorage.getItem("gtr_admin_auth") === "true";
-    if (!isAuth && location !== "/admin") setLocation("/admin");
+    if (!isAdminAuthed() && location !== "/admin") setLocation("/admin");
   }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem("gtr_admin_auth");
+    clearAdminToken();
     setLocation("/admin");
   };
 

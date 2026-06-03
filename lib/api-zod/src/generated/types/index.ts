@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './adminLoginInput';
+export * from './adminLoginResult';
 export * from './campaignInput';
 export * from './campaignResult';
 export * from './customer';
@@ -27,6 +29,8 @@ export * from './orderInput';
 export * from './orderInputType';
 export * from './orderItem';
 export * from './orderStatus';
+export * from './orderStatusUpdate';
+export * from './orderStatusUpdateStatus';
 export * from './orderType';
 export * from './priceTier';
 export * from './priceUpdate';

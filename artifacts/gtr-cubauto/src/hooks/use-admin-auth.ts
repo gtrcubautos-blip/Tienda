@@ -1,24 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
+import { adminLogin } from "@workspace/api-client-react";
+import { getAdminToken, setAdminToken, clearAdminToken } from "@/lib/admin-token";
 
 export function useAdminAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem("gtr_admin_auth") === "true";
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => getAdminToken() !== null);
   const [, setLocation] = useLocation();
 
-  const login = (password: string) => {
-    if (password === "RIVERO123") {
-      localStorage.setItem("gtr_admin_auth", "true");
+  const login = async (password: string): Promise<boolean> => {
+    try {
+      const { token } = await adminLogin({ password });
+      setAdminToken(token);
       setIsAuthenticated(true);
       setLocation("/admin/dashboard");
       return true;
+    } catch {
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
-    localStorage.removeItem("gtr_admin_auth");
+    clearAdminToken();
     setIsAuthenticated(false);
     setLocation("/admin");
   };

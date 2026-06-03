@@ -1,5 +1,7 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
+import { getAdminToken } from "@/lib/admin-token";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
@@ -23,6 +25,10 @@ import Personalizacion from "@/pages/admin/Personalizacion";
 import Clientes from "@/pages/admin/Clientes";
 
 const queryClient = new QueryClient();
+
+// Attach the admin session token (when present) to every API request so the
+// server can authorize admin-write operations.
+setAuthTokenGetter(() => getAdminToken());
 
 function Router() {
   return (

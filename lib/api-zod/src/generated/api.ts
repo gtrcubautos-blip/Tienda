@@ -17,6 +17,21 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Authenticate as admin and obtain a session token
+ */
+
+
+
+export const AdminLoginBody = zod.object({
+  "password": zod.string().min(1)
+})
+
+export const AdminLoginResponse = zod.object({
+  "token": zod.string()
+})
+
+
+/**
  * @summary List all products
  */
 export const ListProductsResponseItem = zod.object({
@@ -243,6 +258,34 @@ export const CreateOrderBody = zod.object({
 })),
   "type": zod.enum(['retail', 'wholesale']),
   "discountCode": zod.string().optional()
+})
+
+
+/**
+ * @summary Update an order's status
+ */
+export const UpdateOrderStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateOrderStatusBody = zod.object({
+  "status": zod.enum(['completed', 'pending', 'cancelled'])
+})
+
+export const UpdateOrderStatusResponse = zod.object({
+  "id": zod.number(),
+  "clientName": zod.string(),
+  "items": zod.array(zod.object({
+  "productId": zod.number(),
+  "productName": zod.string(),
+  "qty": zod.number(),
+  "unitPrice": zod.number()
+})),
+  "total": zod.number(),
+  "type": zod.enum(['retail', 'wholesale']),
+  "status": zod.enum(['pending', 'completed', 'cancelled']),
+  "discountApplied": zod.number().nullish(),
+  "createdAt": zod.string()
 })
 
 

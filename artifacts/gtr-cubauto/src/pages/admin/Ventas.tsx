@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { FinanceGate } from "@/components/FinanceGate";
-import { useListOrders, getListOrdersQueryKey } from "@workspace/api-client-react";
+import { useListOrders, getListOrdersQueryKey, updateOrderStatus } from "@workspace/api-client-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -43,13 +43,7 @@ function parsePaymentMethod(clientName: string): string {
 }
 
 async function patchOrderStatus(id: number, status: string) {
-  const res = await fetch(`/api/orders/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
-  if (!res.ok) throw new Error("Failed");
-  return res.json();
+  return updateOrderStatus(id, { status: status as "completed" | "pending" | "cancelled" });
 }
 
 const STATUS_OPTIONS = [

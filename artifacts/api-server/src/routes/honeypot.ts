@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Request } from "express";
 
 const router = Router();
 
@@ -8,7 +8,7 @@ const FAKE_USERS = [
   { id: 2, username: "root", role: "admin", created: "2024-01-02" },
 ];
 
-function logHoneypot(req: Parameters<Parameters<typeof router.use>[0]>[0], trap: string) {
+function logHoneypot(req: Request, trap: string) {
   req.log.warn(
     { trap, ip: req.ip, ua: req.headers["user-agent"], path: req.originalUrl },
     "HONEYPOT triggered — possible scan/attack"

@@ -317,3 +317,25 @@ export interface DashboardSummary {
   revenueToday: number;
 }
 
+export interface AdminLoginInput {
+  /** @minLength 1 */
+  password: string;
+}
+
+export interface AdminLoginResult {
+  token: string;
+}
+
+export type OrderStatusUpdateStatus = typeof OrderStatusUpdateStatus[keyof typeof OrderStatusUpdateStatus];
+
+
+export const OrderStatusUpdateStatus = {
+  completed: 'completed',
+  pending: 'pending',
+  cancelled: 'cancelled',
+} as const;
+
+export interface OrderStatusUpdate {
+  status: OrderStatusUpdateStatus;
+}
+

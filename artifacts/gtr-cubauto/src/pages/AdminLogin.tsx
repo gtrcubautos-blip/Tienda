@@ -1,22 +1,24 @@
 import { useState } from "react";
-import { useLocation, Link } from "wouter";
+import { Link } from "wouter";
 import { Package, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
-  const [, setLocation] = useLocation();
+  const [submitting, setSubmitting] = useState(false);
+  const { login } = useAdminAuth();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "RIVERO123") {
-      localStorage.setItem("gtr_admin_auth", "true");
-      setLocation("/admin/dashboard");
-    } else {
+    setSubmitting(true);
+    const ok = await login(password);
+    setSubmitting(false);
+    if (!ok) {
       toast({
         title: "Error de autenticación",
         description: "La contraseña ingresada es incorrecta.",
@@ -52,8 +54,8 @@ export default function AdminLogin() {
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-3">
-            <Button type="submit" className="w-full text-white font-medium" size="lg">
-              Acceder al Sistema
+            <Button type="submit" className="w-full text-white font-medium" size="lg" disabled={submitting}>
+              {submitting ? "Accediendo..." : "Acceder al Sistema"}
             </Button>
             <Link
               href="/"

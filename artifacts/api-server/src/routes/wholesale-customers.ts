@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, wholesaleCustomersTable } from "@workspace/db";
 import { eq, count } from "drizzle-orm";
 import { RegisterWholesaleCustomerBody } from "@workspace/api-zod";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router = Router();
 
@@ -70,7 +71,7 @@ router.post("/", async (req, res) => {
 });
 
 // DELETE /wholesale-customers/:id
-router.delete("/:id", async (req, res) => {
+router.delete<{ id: string }>("/:id", requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   await db.delete(wholesaleCustomersTable).where(eq(wholesaleCustomersTable.id, id));

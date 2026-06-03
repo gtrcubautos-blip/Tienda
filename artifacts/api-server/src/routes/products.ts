@@ -6,6 +6,7 @@ import {
   UpdateProductBody,
   UpdateProductPriceBody,
 } from "@workspace/api-zod";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router = Router();
 
@@ -25,7 +26,7 @@ router.get("/products", async (req, res): Promise<void> => {
   }
 });
 
-router.post("/products", async (req, res): Promise<void> => {
+router.post("/products", requireAdmin, async (req, res): Promise<void> => {
   const parsed = CreateProductBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid input" });
@@ -51,7 +52,7 @@ router.post("/products", async (req, res): Promise<void> => {
   }
 });
 
-router.patch("/products/:id", async (req, res): Promise<void> => {
+router.patch<{ id: string }>("/products/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid id" });
@@ -86,7 +87,7 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
   }
 });
 
-router.delete("/products/:id", async (req, res): Promise<void> => {
+router.delete<{ id: string }>("/products/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid id" });
@@ -101,7 +102,7 @@ router.delete("/products/:id", async (req, res): Promise<void> => {
   }
 });
 
-router.patch("/products/:id/price", async (req, res): Promise<void> => {
+router.patch<{ id: string }>("/products/:id/price", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid id" });

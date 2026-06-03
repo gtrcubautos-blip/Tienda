@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, quoteWhatsappsTable } from "@workspace/db";
 import { asc } from "drizzle-orm";
 import { ReplaceQuoteWhatsappsBody } from "@workspace/api-zod";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.get("/quote-whatsapps", async (req, res): Promise<void> => {
   }
 });
 
-router.put("/quote-whatsapps", async (req, res): Promise<void> => {
+router.put("/quote-whatsapps", requireAdmin, async (req, res): Promise<void> => {
   const parsed = ReplaceQuoteWhatsappsBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid input" });

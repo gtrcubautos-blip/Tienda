@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import adminRouter from "./admin";
 import productsRouter from "./products";
 import wholesaleRouter from "./wholesale";
 import discountsRouter from "./discounts";
@@ -16,6 +17,7 @@ const router: IRouter = Router();
 // NOTE: honeypot routes are mounted BEFORE this router in app.ts
 // to intercept scanner traffic early.
 router.use(healthRouter);
+router.use(adminRouter);
 router.use(productsRouter);
 router.use(wholesaleRouter);
 router.use(discountsRouter);

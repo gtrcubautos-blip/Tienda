@@ -1,12 +1,19 @@
 ---
-name: Admin-write APIs are unauthenticated by design
-description: Why the api-server has no server-side authz on admin/write endpoints, and what that implies for new routes.
+name: Admin-write APIs are protected by bearer-token auth
+description: How server-side admin authorization works in api-server and what new admin-write routes must do.
 ---
 
-# Admin-write API endpoints have no server-side auth
+# Admin-write API endpoints require a bearer token
 
-In `@workspace/api-server`, admin/write mutations (orders, products, discounts, quote-whatsapps, etc.) have **no backend authentication or authorization**. Admin access is gated **client-side only** (hardcoded localStorage passwords in the frontend). The OpenAPI spec defines no security schemes; routes are mounted openly.
+In `@workspace/api-server`, admin/write mutations (products, discounts, order-status PATCH, customer delete, campaign, wholesale delete, quote-whatsapps replace) are protected server-side by a `requireAdmin` middleware. Unauthenticated writes get `401 {"error":"No autorizado"}`.
 
-**Why:** This is the established app convention — the storefront creates orders unauthenticated, and the admin UI is a thin client-side gate. New write routes follow this same pattern intentionally to stay consistent.
+**How it works:**
+- Login at `POST /api/admin/login` validates a plaintext password against the `ADMIN_PASSWORD` secret and returns an HMAC-signed token (7-day expiry). The token signing key is *derived from* `ADMIN_PASSWORD` (HMAC), so changing the password invalidates all existing tokens and no second secret is needed.
+- The frontend stores the token in localStorage (`gtr_admin_token`) and registers it via `setAuthTokenGetter` from `@workspace/api-client-react`; the `customFetch` mutator auto-attaches `Authorization: Bearer <token>` to every request when the getter returns non-null.
+- The admin UI auth gate is token-presence based (no more hardcoded `RIVERO123`/`gtr_admin_auth` flag).
 
-**How to apply:** When adding a new admin-write endpoint, do NOT bolt server-side auth onto just that one route — it would be inconsistent and provide little real protection while the rest stay open. If real auth is needed, it must be an app-wide decision (middleware + spec security) made with the user. Architect reviews will flag this as "broken access control"; it is a known, accepted, whole-app gap, not a per-route defect.
+**Scope (intentional):** Only WRITES are protected. Public-by-design routes stay open: storefront `POST /orders`, customer/wholesale registration, storage upload URL requests, and admin-read GETs (orders list/export, customers, dashboard). FinanceGate (`CESIA123`) is a separate, untouched client-side gate.
+
+**How to apply:** New admin-write routes must add `requireAdmin` and `security: [{bearerAuth: []}]` in the OpenAPI spec. Public storefront/registration writes stay open.
+
+**Gotcha (Express 5 typing):** Adding a middleware before a route handler degrades Express 5's path-based `req.params` inference (params become `string | string[]`). Fix by passing the route params generic explicitly, e.g. `router.patch<{ id: string }>("/products/:id", requireAdmin, handler)`.

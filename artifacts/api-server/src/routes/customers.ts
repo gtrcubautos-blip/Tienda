@@ -3,6 +3,7 @@ import { db, customersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { CreateCustomerBody, SendCampaignBody } from "@workspace/api-zod";
 import { encrypt, safeDecrypt } from "../lib/crypto";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router = Router();
 
@@ -47,7 +48,7 @@ router.post("/", async (req, res) => {
 });
 
 // DELETE /customers/:id
-router.delete("/:id", async (req, res) => {
+router.delete<{ id: string }>("/:id", requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   await db.delete(customersTable).where(eq(customersTable.id, id));
@@ -55,7 +56,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // POST /customers/campaign — segments by province, returns recipient list (decrypted emails)
-router.post("/campaign", async (req, res) => {
+router.post("/campaign", requireAdmin, async (req, res) => {
   const parsed = SendCampaignBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });

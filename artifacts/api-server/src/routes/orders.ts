@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, ordersTable, productsTable, discountsTable } from "@workspace/db";
 import { eq, and, lt } from "drizzle-orm";
 import { CreateOrderBody } from "@workspace/api-zod";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router = Router();
 
@@ -95,7 +96,7 @@ router.post("/orders", async (req, res): Promise<void> => {
   }
 });
 
-router.patch("/orders/:id", async (req, res): Promise<void> => {
+router.patch<{ id: string }>("/orders/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   const { status } = req.body as { status: string };
   if (!["completed", "pending", "cancelled"].includes(status)) {

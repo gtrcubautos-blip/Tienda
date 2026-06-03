@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, discountsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { CreateDiscountBody, UpdateDiscountBody } from "@workspace/api-zod";
+import { requireAdmin } from "../lib/adminAuth";
 
 const router = Router();
 
@@ -24,7 +25,7 @@ router.get("/discounts", async (req, res): Promise<void> => {
   }
 });
 
-router.post("/discounts", async (req, res): Promise<void> => {
+router.post("/discounts", requireAdmin, async (req, res): Promise<void> => {
   const parsed = CreateDiscountBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid input" });
@@ -48,7 +49,7 @@ router.post("/discounts", async (req, res): Promise<void> => {
   }
 });
 
-router.patch("/discounts/:id", async (req, res): Promise<void> => {
+router.patch<{ id: string }>("/discounts/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid id" });
@@ -81,7 +82,7 @@ router.patch("/discounts/:id", async (req, res): Promise<void> => {
   }
 });
 
-router.delete("/discounts/:id", async (req, res): Promise<void> => {
+router.delete<{ id: string }>("/discounts/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid id" });
