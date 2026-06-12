@@ -49,7 +49,7 @@ export function CartDrawer() {
   const [address, setAddress] = useState("");
   const [showQuotePicker, setShowQuotePicker] = useState(false);
 
-  const { data: quoteData } = useListQuoteWhatsapps();
+  const { data: quoteData, isError: quoteIsError } = useListQuoteWhatsapps();
   const quoteNumbers = (quoteData ?? []).filter(q => q.number && q.number.replace(/\D/g, "").length >= 8);
 
   const buildQuoteText = () => {
@@ -73,6 +73,10 @@ export function CartDrawer() {
 
   const handleQuote = () => {
     if (items.length === 0) return;
+    if (quoteIsError) {
+      toast({ title: "Error al cargar los números", description: "No se pudieron cargar los números de WhatsApp, intenta de nuevo.", variant: "destructive" });
+      return;
+    }
     if (quoteNumbers.length === 0) {
       toast({ title: "WhatsApp no configurado", description: "Configura un número de cotización en el panel de administración (Personalización → WhatsApp para Cotizaciones).", variant: "destructive" });
       return;
